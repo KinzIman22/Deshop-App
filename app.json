@@ -1,0 +1,29 @@
+{
+  "expo": {
+    "name": "deshop-app",
+    "slug": "deshop-app",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/Logo/logo.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/Logo/logo.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#FFFFFF"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.anonymous.deshopapp"
+    },
+    "android": {
+      "package": "com.anonymous.deshopapp",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/Logo/logo.png",
+        "backgroundColor": "#FFFFFF"
+      }
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    }
+  }
+}
