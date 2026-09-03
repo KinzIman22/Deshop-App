@@ -14,17 +14,18 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
-export default function LoginScreen({ navigation }) {
+export default function SignUpScreen({ navigation }) {
+  const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
-  const handleLogin = () => {
-    if (!email || !password) {
+  const handleSignUp = () => {
+    if (!fullName || !email || !password) {
       Alert.alert('Error', 'Please fill in all fields');
       return;
     }
-    navigation.replace('MainApp');
+    navigation.navigate('OtpVerification', { email });
   };
 
   return (
@@ -42,13 +43,28 @@ export default function LoginScreen({ navigation }) {
               style={styles.logo}
               resizeMode="contain"
             />
-            <Text style={styles.welcomeText}>Welcome to DeShop</Text>
-            <Text style={styles.subText}>Sign in to your account to continue shopping</Text>
+            <Text style={styles.welcomeText}>Create Account</Text>
+            <Text style={styles.subText}>Join DeShop and explore endless shopping possibilities</Text>
           </View>
 
           {/* Form Container */}
           <View style={styles.formContainer}>
             
+            {/* Full Name Field */}
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Full Name</Text>
+              <View style={styles.inputContainer}>
+                <Ionicons name="person-outline" size={20} color="#9CA3AF" style={styles.inputIcon} />
+                <TextInput
+                  style={styles.inputWithIcon}
+                  placeholder="John Doe"
+                  placeholderTextColor="#9CA3AF"
+                  value={fullName}
+                  onChangeText={setFullName}
+                />
+              </View>
+            </View>
+
             {/* Email Field */}
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Email Address</Text>
@@ -73,7 +89,7 @@ export default function LoginScreen({ navigation }) {
                 <Ionicons name="lock-closed-outline" size={20} color="#9CA3AF" style={styles.inputIcon} />
                 <TextInput
                   style={styles.passwordInput}
-                  placeholder="Enter your password"
+                  placeholder="Create a strong password"
                   placeholderTextColor="#9CA3AF"
                   secureTextEntry={!showPassword}
                   value={password}
@@ -89,17 +105,9 @@ export default function LoginScreen({ navigation }) {
               </View>
             </View>
 
-            {/* Forgot Password Link */}
-            <TouchableOpacity 
-              style={styles.forgotContainer} 
-              onPress={() => navigation.navigate('ForgotPassword')}
-            >
-              <Text style={styles.forgotText}>Forgot Password?</Text>
-            </TouchableOpacity>
-
             {/* Main Action Button */}
-            <TouchableOpacity style={styles.primaryBtn} onPress={handleLogin}>
-              <Text style={styles.primaryBtnText}>Sign In</Text>
+            <TouchableOpacity style={styles.primaryBtn} onPress={handleSignUp}>
+              <Text style={styles.primaryBtnText}>Get Started</Text>
             </TouchableOpacity>
 
             {/* Divider */}
@@ -114,7 +122,7 @@ export default function LoginScreen({ navigation }) {
               <TouchableOpacity 
                 activeOpacity={0.5} 
                 style={styles.socialTouchable} 
-                onPress={() => Alert.alert('Google', 'Google sign in clicked')}
+                onPress={() => Alert.alert('Google', 'Google sign up clicked')}
               >
                 <Image 
                   source={{ uri: 'https://cdn-icons-png.flaticon.com/512/2991/2991148.png' }} 
@@ -127,7 +135,7 @@ export default function LoginScreen({ navigation }) {
               <TouchableOpacity 
                 activeOpacity={0.5} 
                 style={styles.socialTouchable} 
-                onPress={() => Alert.alert('Twitter', 'Twitter sign in clicked')}
+                onPress={() => Alert.alert('Twitter', 'Twitter sign up clicked')}
               >
                 <Image 
                   source={{ uri: 'https://cdn-icons-png.flaticon.com/512/733/733579.png' }} 
@@ -140,7 +148,7 @@ export default function LoginScreen({ navigation }) {
               <TouchableOpacity 
                 activeOpacity={0.5} 
                 style={styles.socialTouchable} 
-                onPress={() => Alert.alert('Facebook', 'Facebook sign in clicked')}
+                onPress={() => Alert.alert('Facebook', 'Facebook sign up clicked')}
               >
                 <Image 
                   source={{ uri: 'https://cdn-icons-png.flaticon.com/512/733/733547.png' }} 
@@ -151,11 +159,11 @@ export default function LoginScreen({ navigation }) {
               </TouchableOpacity>
             </View>
 
-            {/* Switch to Sign Up */}
+            {/* Switch to Sign In */}
             <View style={styles.footerContainer}>
-              <Text style={styles.noAccountText}>Don't have an account? </Text>
-              <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
-                <Text style={styles.linkText}>Sign Up</Text>
+              <Text style={styles.noAccountText}>Already have an account? </Text>
+              <TouchableOpacity onPress={() => navigation.goBack()}>
+                <Text style={styles.linkText}>Sign In</Text>
               </TouchableOpacity>
             </View>
 
@@ -198,6 +206,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#6B7280',
     textAlign: 'center',
+    paddingHorizontal: 10,
   },
   formContainer: {
     width: '100%',
@@ -241,20 +250,12 @@ const styles = StyleSheet.create({
   eyeIcon: {
     padding: 4,
   },
-  forgotContainer: {
-    alignItems: 'flex-end',
-    marginBottom: 18,
-  },
-  forgotText: {
-    color: '#2563EB',
-    fontSize: 14,
-    fontWeight: '600',
-  },
   primaryBtn: {
     backgroundColor: '#2563EB',
     borderRadius: 12,
     paddingVertical: 16,
     alignItems: 'center',
+    marginTop: 4,
     shadowColor: '#2563EB',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.25,

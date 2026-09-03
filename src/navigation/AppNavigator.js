@@ -5,8 +5,12 @@ import { NavigationContainer } from '@react-navigation/native';
 import SplashScreen from '../screens/SplashScreen';
 import OnboardingScreen from '../screens/OnboardingScreen';
 import LoginScreen from '../screens/LoginScreen';
-// Aur agar Home screen bhi hai toh:
-// import HomeScreen from './screens/HomeScreen';
+import SignUpScreen from '../screens/SignUpScreen';
+import OtpVerificationScreen from '../screens/OtpVerificationScreen';
+import ForgotPasswordScreen from '../screens/ForgotPasswordScreen';
+import BottomTabNavigator from './BottomTabNavigator';
+import CategoryProductsScreen from '../screens/CategoryProductsScreen';
+
 
 const Stack = createNativeStackNavigator();
 
@@ -15,12 +19,16 @@ export default function AppNavigator() {
     <NavigationContainer>
       <Stack.Navigator 
         initialRouteName="Splash"
-        screenOptions={{ headerShown: false }} // Saari screens se default header hatane ke liye
+        screenOptions={{ headerShown: false }}
       >
         <Stack.Screen name="Splash" component={SplashScreen} />
         <Stack.Screen name="Onboarding" component={OnboardingScreen} />
         <Stack.Screen name="Login" component={LoginScreen} />
-        {/* <Stack.Screen name="Home" component={HomeScreen} /> */}
+        <Stack.Screen name="SignUp" component={SignUpScreen} />
+        <Stack.Screen name="OtpVerification" component={OtpVerificationScreen} />
+        <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
+        <Stack.Screen name="MainApp" component={BottomTabNavigator} />
+       <Stack.Screen name="CategoryProducts" component={CategoryProductsScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
