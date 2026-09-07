@@ -1,18 +1,12 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { View, Text, StyleSheet } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 
 import HomeScreen from '../screens/HomeScreen';
 import CategoriesScreen from '../screens/CategoriesScreen';
-import CartScreen from '../screens/CartScreen'; // <-- 1. Asli Cart Screen import kar li
+import CartScreen from '../screens/CartScreen'; 
+import ProfileScreen from '../screens/ProfileScreen'; // <-- 1. Asli Profile Screen import kar li
 
-// Baaki bachi hui tabs ke liye temporary placeholder (Sirf Profile ke liye reh gaya)
-const DummyScreen = ({ route }) => (
-  <View style={styles.centerContainer}>
-    <Text style={styles.text}>{route.name} Screen Coming Soon!</Text>
-  </View>
-);
+import { Ionicons } from '@expo/vector-icons';
 
 const Tab = createBottomTabNavigator();
 
@@ -60,28 +54,14 @@ export default function BottomTabNavigator() {
       />
       <Tab.Screen 
         name="CartTab" 
-        component={CartScreen} // <-- 2. DummyScreen ki jagah CartScreen laga diya
+        component={CartScreen} 
         options={{ title: 'Cart' }}
       />
       <Tab.Screen 
         name="ProfileTab" 
-        component={DummyScreen} 
+        component={ProfileScreen} // <-- 2. DummyScreen ki jagah ProfileScreen laga di
         options={{ title: 'You' }}
       />
     </Tab.Navigator>
   );
 }
-
-const styles = StyleSheet.create({
-  centerContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#F3F4F6',
-  },
-  text: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#4B5563',
-  },
-});

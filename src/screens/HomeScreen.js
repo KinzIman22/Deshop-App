@@ -355,9 +355,9 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   activeSubChip: {
-    backgroundColor: '#E5E7EB',
+    backgroundColor: '#F97316',
     borderWidth: 1,
-    borderColor: '#000000',
+    borderColor: '#F97316',
   },
   subCatText: {
     fontSize: 13,
@@ -365,7 +365,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   activeSubText: {
-    color: '#000000',
+    color: '#FFFFFF',
     fontWeight: '700',
   },
   gridContainer: {
