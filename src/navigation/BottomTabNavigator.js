@@ -4,9 +4,10 @@ import { View, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 import HomeScreen from '../screens/HomeScreen';
-import CategoriesScreen from '../screens/CategoriesScreen'; // Asli Categories Screen import kar li
+import CategoriesScreen from '../screens/CategoriesScreen';
+import CartScreen from '../screens/CartScreen'; // <-- 1. Asli Cart Screen import kar li
 
-// Baaki bachi hui tabs ke liye temporary placeholder
+// Baaki bachi hui tabs ke liye temporary placeholder (Sirf Profile ke liye reh gaya)
 const DummyScreen = ({ route }) => (
   <View style={styles.centerContainer}>
     <Text style={styles.text}>{route.name} Screen Coming Soon!</Text>
@@ -54,12 +55,12 @@ export default function BottomTabNavigator() {
       />
       <Tab.Screen 
         name="CategoriesTab" 
-        component={CategoriesScreen} // Yahan DummyScreen ki jagah CategoriesScreen laga di
+        component={CategoriesScreen} 
         options={{ title: 'Categories' }}
       />
       <Tab.Screen 
         name="CartTab" 
-        component={DummyScreen} 
+        component={CartScreen} // <-- 2. DummyScreen ki jagah CartScreen laga diya
         options={{ title: 'Cart' }}
       />
       <Tab.Screen 

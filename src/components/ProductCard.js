@@ -2,24 +2,24 @@ import React from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
-export default function ProductCard({ item, onPress }) {
+export default function ProductCard({ item, onPress, onAddToCart }) {
   return (
     <TouchableOpacity style={styles.card} onPress={onPress}>
-      <Image source={{ uri: item.image }} style={styles.productImage} />
-      
-      <View style={styles.detailsContainer}>
-        <Text style={styles.title} numberOfLines={2}>{item.title}</Text>
-        
-        <View style={styles.ratingRow}>
-          <Ionicons name="star" size={12} color="#F59E0B" />
-          <Text style={styles.ratingText}>{item.rating}</Text>
-          <Text style={styles.soldText}>{item.sold}</Text>
-        </View>
-
-        <View style={styles.priceRow}>
-          <Text style={styles.price}>{item.price}</Text>
-          <TouchableOpacity style={styles.cartButton}>
-            <Ionicons name="cart-outline" size={16} color="#F97316" />
+      <Image source={{ uri: item.image }} style={styles.image} />
+      <View style={styles.info}>
+        <Text numberOfLines={2} style={styles.title}>{item.title}</Text>
+        <View style={styles.row}>
+          <Text style={styles.price}>${item.price}</Text>
+          
+          {/* Yeh wala TouchableOpacity aur onPress hona lazmi hai */}
+          <TouchableOpacity 
+            style={styles.cartBtn} 
+            onPress={(e) => {
+              e.stopPropagation(); // Yeh card ki apni detail navigation ko rokay ga
+              onAddToCart && onAddToCart();
+            }}
+          >
+            <Ionicons name="cart-outline" size={18} color="#EA580C" />
           </TouchableOpacity>
         </View>
       </View>
@@ -32,60 +32,39 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#FFFFFF',
     borderRadius: 8,
-    marginBottom: 12,
-    marginHorizontal: 4,
+    margin: 4,
+    padding: 8,
     borderWidth: 1,
     borderColor: '#E5E7EB',
-    overflow: 'hidden',
   },
-  productImage: {
+  image: {
     width: '100%',
-    height: 140,
+    height: 120,
+    borderRadius: 6,
     resizeMode: 'cover',
   },
-  detailsContainer: {
-    padding: 8,
+  info: {
+    marginTop: 6,
   },
   title: {
     fontSize: 12,
     color: '#1F2937',
     height: 32,
-    marginBottom: 4,
   },
-  ratingRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 6,
-  },
-  ratingText: {
-    fontSize: 11,
-    color: '#4B5563',
-    marginLeft: 2,
-    fontWeight: '600',
-  },
-  soldText: {
-    fontSize: 11,
-    color: '#9CA3AF',
-    marginLeft: 6,
-  },
-  priceRow: {
+  row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    marginTop: 4,
   },
   price: {
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: '700',
-    color: '#F97316', // Orange Theme Price Accent
+    color: '#000000',
   },
-  cartButton: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: '#FED7AA',
-    backgroundColor: '#FFF7ED',
-    justifyContent: 'center',
-    alignItems: 'center',
+  cartBtn: {
+    padding: 6,
+    backgroundColor: '#FFEDD5',
+    borderRadius: 16,
   },
 });

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { 
   View, 
   Text, 
@@ -7,17 +7,22 @@ import {
   TouchableOpacity, 
   StyleSheet, 
   SafeAreaView,
-  ScrollView 
+  ScrollView,
+  Alert 
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 import ProductCard from '../components/ProductCard';
 import { TOP_CATEGORIES, SUB_CATEGORIES, PRODUCTS } from '../api/mockData';
+import { CartContext } from '../context/CartContext';
 
 export default function HomeScreen({ navigation }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTopCat, setActiveTopCat] = useState('1');
   const [activeSubCat, setActiveSubCat] = useState('s1');
+
+  // Cart Context se addToCart function nikala
+  const { addToCart } = useContext(CartContext);
 
   // Filter products based on top category, sub-category, and search input
   const filteredProducts = PRODUCTS.filter(item => {
@@ -28,6 +33,13 @@ export default function HomeScreen({ navigation }) {
 
     return matchesTopCat && matchesSubCat && matchesSearch;
   });
+
+  // Cart mein item add karne ka handler function
+  const handleAddToCart = (item) => {
+    const colorName = item.colors ? item.colors[0].name : 'Standard';
+    addToCart(item, colorName, 1);
+    Alert.alert("Success", "1 item added to your cart!");
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -106,7 +118,7 @@ export default function HomeScreen({ navigation }) {
         <View style={styles.whyChooseBanner}>
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             <Ionicons name="checkmark-circle" size={18} color="#FFFFFF" />
-            <Text style={styles.whyChooseText}> Why choose Temu?</Text>
+            <Text style={styles.whyChooseText}> Why choose deshop?</Text>
           </View>
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             <Text style={styles.whyChooseText}>Safe payments </Text>
@@ -135,7 +147,7 @@ export default function HomeScreen({ navigation }) {
           </TouchableOpacity>
         </View>
 
-        {/* Secondary Filter Sub-Categories Bar (All, Deals, 5-Star Rated, Best-Selling) */}
+        {/* Secondary Filter Sub-Categories Bar */}
         <View style={styles.subCategoryContainer}>
           <FlatList
             data={SUB_CATEGORIES}
@@ -176,7 +188,8 @@ export default function HomeScreen({ navigation }) {
               renderItem={({ item }) => (
                 <ProductCard 
                   item={item} 
-                  onPress={() => navigation.navigate('ItemDetail', { product: item })} 
+                  onPress={() => navigation.getParent()?.navigate('ItemDetail', { product: item })} 
+                  onAddToCart={() => handleAddToCart(item)}
                 />
               )}
             />

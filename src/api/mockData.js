@@ -146,7 +146,7 @@ export const PRODUCTS = [
     price: 'Rs.950',
     rating: '4.7',
     sold: '14K+ sold',
-    image: 'https://images.unsplash.com/photo-1556911220-e15b29be8c8f?w=500&auto=format&fit=crop&q=60',
+    image: 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=500&auto=format&fit=crop&q=60',
   },
 
   // Sports (Top ID: 7)

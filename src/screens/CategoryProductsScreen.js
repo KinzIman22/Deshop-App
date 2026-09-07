@@ -140,7 +140,17 @@ export default function CategoryProductsScreen({ route, navigation }) {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.gridContainer}
         renderItem={({ item }) => (
-          <TouchableOpacity style={styles.productCard}>
+          <TouchableOpacity 
+            style={styles.productCard}
+            onPress={() => {
+              // Try standard navigation first, fallback to parent if nested inside tabs
+              try {
+                navigation.navigate('ItemDetail', { product: item });
+              } catch (e) {
+                navigation.getParent()?.navigate('ItemDetail', { product: item });
+              }
+            }}
+          >
             <View style={styles.productImageContainer}>
               <Image source={{ uri: item.image }} style={styles.productImage} resizeMode="cover" />
               {item.tag && (

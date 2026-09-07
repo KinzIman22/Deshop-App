@@ -1,12 +1,11 @@
-// App.js
 import React from 'react';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
-import AppNavigator from './src/navigation/AppNavigator';
+import { CartProvider } from './src/context/CartContext'; // Path apne project ke mutabiq check kar lein
+import AppNavigator from './src/navigation/AppNavigator'; // Ya jo bhi aapka main navigator ho
 
 export default function App() {
   return (
-    <SafeAreaProvider>
+    <CartProvider>
       <AppNavigator />
-    </SafeAreaProvider>
+    </CartProvider>
   );
 }

@@ -10,7 +10,8 @@ import OtpVerificationScreen from '../screens/OtpVerificationScreen';
 import ForgotPasswordScreen from '../screens/ForgotPasswordScreen';
 import BottomTabNavigator from './BottomTabNavigator';
 import CategoryProductsScreen from '../screens/CategoryProductsScreen';
-
+import ProductDetailScreen from '../screens/ProductDetailScreen';
+import CartScreen from '../screens/CartScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -29,6 +30,8 @@ export default function AppNavigator() {
         <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
         <Stack.Screen name="MainApp" component={BottomTabNavigator} />
        <Stack.Screen name="CategoryProducts" component={CategoryProductsScreen} />
+       <Stack.Screen name="ItemDetail" component={ProductDetailScreen} options={{ headerShown: false }} />
+       <Stack.Screen name="Cart" component={CartScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
