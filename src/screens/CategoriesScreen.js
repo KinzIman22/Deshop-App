@@ -14,10 +14,15 @@ import { Ionicons } from '@expo/vector-icons';
 
 // Data ko alag file se import kar liya
 import { LEFT_CATEGORIES, SUB_CATEGORIES_DATA } from '../data/categoriesData';
+// Available Offers Modal import kiya
+import AvailableOffersModal from '../components/AvailableOffersModal';
 
 export default function CategoriesScreen({ navigation }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeLeftCat, setActiveLeftCat] = useState('1');
+  
+  // Modal visibility state
+  const [modalVisible, setModalVisible] = useState(false);
 
   const currentSubCategories = SUB_CATEGORIES_DATA[activeLeftCat] || SUB_CATEGORIES_DATA['1'];
 
@@ -42,8 +47,11 @@ export default function CategoriesScreen({ navigation }) {
         </TouchableOpacity>
       </View>
 
-      {/* Promotional Banner Info Bar */}
-      <View style={styles.infoBar}>
+      {/* Promotional Banner Info Bar (Clickable to open Available Offers Modal) */}
+      <TouchableOpacity 
+        style={styles.infoBar}
+        onPress={() => setModalVisible(true)}
+      >
         <View style={styles.infoItem}>
           <Ionicons name="checkmark" size={14} color="#16A34A" />
           <Text style={styles.infoText}> Free shipping</Text>
@@ -53,7 +61,7 @@ export default function CategoriesScreen({ navigation }) {
           <Text style={styles.infoText}> Price adjustment within 30 days</Text>
         </View>
         <Ionicons name="chevron-forward" size={14} color="#6B7280" />
-      </View>
+      </TouchableOpacity>
 
       {/* Main Body Split Layout */}
       <View style={styles.bodyContainer}>
@@ -119,6 +127,12 @@ export default function CategoriesScreen({ navigation }) {
           </ScrollView>
         </View>
       </View>
+
+      {/* Available Offers Bottom Sheet Modal */}
+      <AvailableOffersModal 
+        visible={modalVisible} 
+        onClose={() => setModalVisible(false)} 
+      />
     </SafeAreaView>
   );
 }
