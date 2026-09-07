@@ -210,7 +210,7 @@ export default function CartScreen({ navigation }) {
           </Text>
         </View>
 
-        {/* Protection Badges (Proper Green & White Styling) */}
+        {/* Protection Badges */}
         <View style={styles.badgesContainer}>
           <View style={styles.badgeItem}>
             <View style={styles.badgeIconWrapper}>
@@ -240,11 +240,10 @@ export default function CartScreen({ navigation }) {
           <Text style={styles.bottomCurrentPrice}>Rs.{totalPrice}</Text>
         </View>
         <TouchableOpacity 
-          style={styles.checkoutBtn}
-          activeOpacity={0.8}
-          onPress={() => alert('Proceeding to Checkout!')}
+          style={styles.checkoutButton} 
+          onPress={() => navigation.navigate('CheckoutAddress')}
         >
-          <Text style={styles.checkoutBtnText}>Checkout Now</Text>
+          <Text style={styles.checkoutButtonText}>Proceed to Checkout</Text>
         </TouchableOpacity>
       </View>
 
@@ -480,7 +479,7 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: '#F0FDF4', // Light green soft background
+    backgroundColor: '#F0FDF4',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 6,
@@ -503,7 +502,7 @@ const styles = StyleSheet.create({
   },
   bottomPrice: { fontSize: 12, color: '#9CA3AF', textDecorationLine: 'line-through' },
   bottomCurrentPrice: { fontSize: 16, fontWeight: 'bold', color: '#111827', marginRight: 16 },
-  checkoutBtn: {
+  checkoutButton: {
     flex: 1,
     backgroundColor: '#EA580C',
     paddingVertical: 12,
@@ -515,7 +514,7 @@ const styles = StyleSheet.create({
     shadowRadius: 5,
     elevation: 4,
   },
-  checkoutBtnText: { color: '#FFF', fontWeight: 'bold', fontSize: 13 },
+  checkoutButtonText: { color: '#FFF', fontWeight: 'bold', fontSize: 13 },
   modalOverlay: {
     position: 'absolute',
     top: 0, left: 0, right: 0, bottom: 0,
