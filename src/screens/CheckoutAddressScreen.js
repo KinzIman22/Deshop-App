@@ -9,19 +9,32 @@ import {
   ScrollView, 
   Modal, 
   FlatList,
-  Alert 
+  Alert,
+  KeyboardAvoidingView,
+  Platform 
 } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 
-// Pakistan Provinces and Cities Data
-const PAKISTAN_LOCATIONS = [
-  { province: 'Punjab', cities: ['Lahore', 'Faisalabad', 'Rawalpindi', 'Multan', 'Gujranwala', 'Bahawalpur', 'Sargodha', 'Sialkot', 'Sheikhupura', 'Rahim Yar Khan', 'Gujrat', 'Sahiwal'] },
-  { province: 'Sindh', cities: ['Karachi', 'Hyderabad', 'Sukkur', 'Larkana', 'Nawabshah', 'Mirpur Khas', 'Jacobabad', 'Shikarpur', 'Tando Adam'] },
-  { province: 'Khyber Pakhtunkhwa (KP)', cities: ['Peshawar', 'Abbottabad', 'Mardan', 'Swat', 'Mingora', 'Kohat', 'Nowshera', 'Dera Ismail Khan', 'Charsadda'] },
-  { province: 'Balochistan', cities: ['Quetta', 'Gwadar', 'Turbat', 'Khuzdar', 'Sibi', 'Hub', 'Chaman', 'Loralai'] },
-  { province: 'Islamabad Capital Territory', cities: ['Islamabad'] },
-  { province: 'Azad Jammu & Kashmir (AJK)', cities: ['Muzaffarabad', 'Mirpur', 'Rawalakot', 'Kotli', 'Bhimber'] },
-  { province: 'Gilgit-Baltistan', cities: ['Gilgit', 'Skardu', 'Hunza', 'Diamer', 'Ghizer'] }
+// Pakistan Provinces List
+const PAKISTAN_PROVINCES = [
+  'Punjab', 
+  'Sindh', 
+  'Khyber Pakhtunkhwa (KP)', 
+  'Balochistan', 
+  'Islamabad Capital Territory', 
+  'Azad Jammu & Kashmir (AJK)', 
+  'Gilgit-Baltistan'
+];
+
+// All Pakistan Cities combined list for search & drop-down
+const ALL_PAKISTAN_CITIES = [
+  'Lahore', 'Faisalabad', 'Rawalpindi', 'Multan', 'Gujranwala', 'Bahawalpur', 'Sargodha', 'Sialkot', 'Sheikhupura', 'Rahim Yar Khan', 'Gujrat', 'Sahiwal',
+  'Karachi', 'Hyderabad', 'Sukkur', 'Larkana', 'Nawabshah', 'Mirpur Khas', 'Jacobabad', 'Shikarpur', 'Tando Adam',
+  'Peshawar', 'Abbottabad', 'Mardan', 'Swat', 'Mingora', 'Kohat', 'Nowshera', 'Dera Ismail Khan', 'Charsadda',
+  'Quetta', 'Gwadar', 'Turbat', 'Khuzdar', 'Sibi', 'Hub', 'Chaman', 'Loralai',
+  'Islamabad',
+  'Muzaffarabad', 'Mirpur', 'Rawalakot', 'Kotli', 'Bhimber',
+  'Gilgit', 'Skardu', 'Hunza', 'Diamer', 'Ghizer'
 ];
 
 export default function CheckoutAddressScreen({ navigation }) {
@@ -32,6 +45,7 @@ export default function CheckoutAddressScreen({ navigation }) {
   const [selectedProvince, setSelectedProvince] = useState('Punjab');
   const [selectedCity, setSelectedCity] = useState('Lahore');
   const [address, setAddress] = useState('');
+  const [postalCode, setPostalCode] = useState('');
 
   // Selector Modal States
   const [modalVisible, setModalVisible] = useState(false);
@@ -49,20 +63,15 @@ export default function CheckoutAddressScreen({ navigation }) {
   const [line2Green, setLine2Green] = useState(false);
   const [step3Green, setStep3Green] = useState(false);
 
-  // Filter list data based on type (province list or selected province's cities list with search)
+  // Filter list data based on type with search query
   const getModalData = () => {
     if (modalType === 'province') {
-      return PAKISTAN_LOCATIONS.map(p => p.province).filter(p => 
+      return PAKISTAN_PROVINCES.filter(p => 
         p.toLowerCase().includes(searchQuery.toLowerCase())
       );
     } else {
-      // Find the selected province object
-      const provObj = PAKISTAN_LOCATIONS.find(p => p.province === selectedProvince);
-      const cities = provObj ? provObj.cities : [];
-      
-      // Filter cities based on search query inside that province
-      if (!searchQuery.trim()) return cities;
-      return cities.filter(c => c.toLowerCase().includes(searchQuery.toLowerCase()));
+      if (!searchQuery.trim()) return ALL_PAKISTAN_CITIES;
+      return ALL_PAKISTAN_CITIES.filter(c => c.toLowerCase().includes(searchQuery.toLowerCase()));
     }
   };
 
@@ -93,145 +102,164 @@ export default function CheckoutAddressScreen({ navigation }) {
 
   return (
     <SafeAreaView style={styles.container}>
-      
-      {/* Top Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-          <Ionicons name="chevron-back" size={22} color="#1F2937" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Add an address to order</Text>
-        <View style={{ width: 32 }} />
-      </View>
-
-      {/* Safeguard Secure Banner */}
-      <View style={styles.secureContainer}>
-        <Ionicons name="lock-closed" size={13} color="#16A34A" />
-        <Text style={styles.secureText}> All data is safeguarded</Text>
-      </View>
-
-      {/* Free Shipping Highlight Banner */}
-      <View style={styles.promoBanner}>
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <Ionicons name="checkmark-circle" size={15} color="#16A34A" />
-          <Text style={styles.promoText}> Free shipping</Text>
+      <KeyboardAvoidingView 
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'} 
+        style={{ flex: 1 }}
+      >
+        {/* Top Header */}
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+            <Ionicons name="chevron-back" size={22} color="#1F2937" />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Add an address to order</Text>
+          <View style={{ width: 32 }} />
         </View>
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <Ionicons name="checkmark-circle" size={15} color="#16A34A" />
-          <Text style={styles.promoText}> 30-day price adjustment</Text>
-        </View>
-      </View>
 
-      <ScrollView contentContainerStyle={{ padding: 16 }}>
-        
-        {/* Country Selector */}
-        <View style={styles.countrySelector}>
-          <Text style={styles.countryLabel}>Country / Region</Text>
+        {/* Safeguard Secure Banner */}
+        <View style={styles.secureContainer}>
+          <Ionicons name="lock-closed" size={13} color="#16A34A" />
+          <Text style={styles.secureText}> All data is safeguarded</Text>
+        </View>
+
+        {/* Free Shipping Highlight Banner */}
+        <View style={styles.promoBanner}>
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <Text style={{ fontWeight: '700', color: '#1F2937', marginRight: 4 }}>Pakistan</Text>
-            <Ionicons name="shield-checkmark" size={16} color="#16A34A" />
+            <Ionicons name="checkmark-circle" size={15} color="#16A34A" />
+            <Text style={styles.promoText}> Free shipping</Text>
+          </View>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <Ionicons name="checkmark-circle" size={15} color="#16A34A" />
+            <Text style={styles.promoText}> 30-day price adjustment</Text>
           </View>
         </View>
 
-        {/* Full Name */}
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Full name <Text style={{ color: '#EA580C' }}>*</Text></Text>
-          <View style={styles.inputContainer}>
-            <TextInput 
-              style={styles.input}
-              placeholder="Enter full name"
-              value={fullName}
-              onChangeText={setFullName}
-              placeholderTextColor="#9CA3AF"
-            />
-            {fullName.length > 0 && (
-              <TouchableOpacity onPress={() => setFullName('')}>
-                <Ionicons name="close-circle" size={18} color="#9CA3AF" />
-              </TouchableOpacity>
-            )}
-          </View>
-        </View>
-
-        {/* Phone Number */}
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Phone number <Text style={{ color: '#EA580C' }}>*</Text></Text>
-          <View style={[styles.inputContainer, { paddingHorizontal: 0 }]}>
-            <View style={styles.phonePrefix}>
-              <Text style={{ fontWeight: '600', color: '#1F2937', fontSize: 13 }}>PK +92</Text>
-              <View style={styles.verticalDivider} />
+        <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 30 }}>
+          
+          {/* Country Selector */}
+          <View style={styles.countrySelector}>
+            <Text style={styles.countryLabel}>Country / Region</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <Text style={{ fontWeight: '700', color: '#1F2937', marginRight: 4 }}>Pakistan</Text>
+              <Ionicons name="shield-checkmark" size={16} color="#16A34A" />
             </View>
-            <TextInput 
-              style={[styles.input, { paddingLeft: 8 }]}
-              value={phoneNumber}
-              onChangeText={setPhoneNumber}
-              keyboardType="phone-pad"
-              placeholderTextColor="#9CA3AF"
-            />
           </View>
-        </View>
 
-        {/* Province Field */}
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Province <Text style={{ color: '#EA580C' }}>*</Text></Text>
-          <TouchableOpacity 
-            style={styles.dropdownContainer} 
-            onPress={() => {
-              setModalType('province');
-              setSearchQuery('');
-              setModalVisible(true);
-            }}
-          >
-            <Text style={{ color: '#1F2937', fontWeight: '600' }}>{selectedProvince}</Text>
-            <Ionicons name="chevron-down" size={18} color="#4B5563" />
+          {/* Full Name */}
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Full name <Text style={{ color: '#EA580C' }}>*</Text></Text>
+            <View style={styles.inputContainer}>
+              <TextInput 
+                style={styles.input}
+                placeholder="Enter full name"
+                value={fullName}
+                onChangeText={setFullName}
+                placeholderTextColor="#9CA3AF"
+              />
+              {fullName.length > 0 && (
+                <TouchableOpacity onPress={() => setFullName('')}>
+                  <Ionicons name="close-circle" size={18} color="#9CA3AF" />
+                </TouchableOpacity>
+              )}
+            </View>
+          </View>
+
+          {/* Phone Number */}
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Phone number <Text style={{ color: '#EA580C' }}>*</Text></Text>
+            <View style={[styles.inputContainer, { paddingHorizontal: 0 }]}>
+              <View style={styles.phonePrefix}>
+                <Text style={{ fontWeight: '600', color: '#1F2937', fontSize: 13 }}>PK +92</Text>
+                <View style={styles.verticalDivider} />
+              </View>
+              <TextInput 
+                style={[styles.input, { paddingLeft: 8 }]}
+                value={phoneNumber}
+                onChangeText={setPhoneNumber}
+                keyboardType="phone-pad"
+                placeholderTextColor="#9CA3AF"
+              />
+            </View>
+          </View>
+
+          {/* Province Field */}
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Province <Text style={{ color: '#EA580C' }}>*</Text></Text>
+            <TouchableOpacity 
+              style={styles.dropdownContainer} 
+              onPress={() => {
+                setModalType('province');
+                setSearchQuery('');
+                setModalVisible(true);
+              }}
+            >
+              <Text style={{ color: '#1F2937', fontWeight: '600' }}>{selectedProvince}</Text>
+              <Ionicons name="chevron-down" size={18} color="#4B5563" />
+            </TouchableOpacity>
+          </View>
+
+          {/* City Field */}
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>City <Text style={{ color: '#EA580C' }}>*</Text></Text>
+            <TouchableOpacity 
+              style={styles.dropdownContainer} 
+              onPress={() => {
+                setModalType('city');
+                setSearchQuery('');
+                setModalVisible(true);
+              }}
+            >
+              <Text style={{ color: '#1F2937', fontWeight: '600' }}>{selectedCity || 'Select City'}</Text>
+              <Ionicons name="search-outline" size={18} color="#4B5563" />
+            </TouchableOpacity>
+          </View>
+
+          {/* Building, street */}
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Building, street, and area etc. <Text style={{ color: '#EA580C' }}>*</Text></Text>
+            <View style={styles.inputContainer}>
+              <TextInput 
+                style={styles.input}
+                placeholder="House #15, Street #1, Wapda Town"
+                value={address}
+                onChangeText={setAddress}
+                placeholderTextColor="#9CA3AF"
+              />
+            </View>
+          </View>
+
+          {/* Postal / ZIP Code (Optional) */}
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Postal Code / ZIP (Optional)</Text>
+            <View style={styles.inputContainer}>
+              <TextInput 
+                style={styles.input}
+                placeholder="e.g., 54000"
+                value={postalCode}
+                onChangeText={setPostalCode}
+                keyboardType="number-pad"
+                placeholderTextColor="#9CA3AF"
+              />
+            </View>
+          </View>
+
+        </ScrollView>
+
+        {/* Bottom Save Button */}
+        <View style={styles.footer}>
+          <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
+            <Text style={styles.saveButtonText}>Save & Proceed</Text>
           </TouchableOpacity>
         </View>
+      </KeyboardAvoidingView>
 
-        {/* City Field (Shows only selected province's cities with search) */}
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>City <Text style={{ color: '#EA580C' }}>*</Text></Text>
-          <TouchableOpacity 
-            style={styles.dropdownContainer} 
-            onPress={() => {
-              setModalType('city');
-              setSearchQuery('');
-              setModalVisible(true);
-            }}
-          >
-            <Text style={{ color: '#1F2937', fontWeight: '600' }}>{selectedCity || 'Select City'}</Text>
-            <Ionicons name="search-outline" size={18} color="#4B5563" />
-          </TouchableOpacity>
-        </View>
-
-        {/* Building, street */}
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Building, street, and area etc. <Text style={{ color: '#EA580C' }}>*</Text></Text>
-          <View style={styles.inputContainer}>
-            <TextInput 
-              style={styles.input}
-              placeholder="House #15, Street #1, Wapda Town"
-              value={address}
-              onChangeText={setAddress}
-              placeholderTextColor="#9CA3AF"
-            />
-          </View>
-        </View>
-
-      </ScrollView>
-
-      {/* Bottom Save Button */}
-      <View style={styles.footer}>
-        <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-          <Text style={styles.saveButtonText}>Save & Proceed</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* --- SELECTOR MODAL (Province / Searchable City Selection) --- */}
+      {/* --- SELECTOR MODAL (Province / All Pakistan Cities Selection) --- */}
       <Modal visible={modalVisible} transparent animationType="slide">
         <View style={styles.selectorModalOverlay}>
           <View style={styles.selectorModalContent}>
             
             <View style={styles.selectorHeader}>
               <Text style={styles.selectorTitle}>
-                {modalType === 'province' ? 'Select Province' : `Cities in ${selectedProvince}`}
+                {modalType === 'province' ? 'Select Province' : 'Select City in Pakistan'}
               </Text>
               <TouchableOpacity onPress={() => setModalVisible(false)}>
                 <Ionicons name="close" size={22} color="#1F2937" />
@@ -243,7 +271,7 @@ export default function CheckoutAddressScreen({ navigation }) {
               <Ionicons name="search" size={16} color="#9CA3AF" style={{ marginRight: 8 }} />
               <TextInput 
                 style={{ flex: 1, fontSize: 13, color: '#1F2937' }}
-                placeholder={modalType === 'province' ? "Search province..." : `Search city in ${selectedProvince}...`}
+                placeholder={modalType === 'province' ? "Search province..." : "Search any city in Pakistan..."}
                 value={searchQuery}
                 onChangeText={setSearchQuery}
                 placeholderTextColor="#9CA3AF"
@@ -264,11 +292,6 @@ export default function CheckoutAddressScreen({ navigation }) {
                   onPress={() => {
                     if (modalType === 'province') {
                       setSelectedProvince(item);
-                      // Automatically set the first city of the newly chosen province as default
-                      const provObj = PAKISTAN_LOCATIONS.find(p => p.province === item);
-                      if (provObj && provObj.cities.length > 0) {
-                        setSelectedCity(provObj.cities[0]);
-                      }
                     } else {
                       setSelectedCity(item);
                     }
@@ -316,7 +339,7 @@ export default function CheckoutAddressScreen({ navigation }) {
             <Text style={styles.shippingAddressLabel}>Shipping address preview:</Text>
             <View style={styles.addressPreviewBox}>
               <Text style={styles.addressPreviewText}>
-                {address ? address : 'House #12'}, {selectedCity}, {selectedProvince}
+                {address ? address : 'House #12'}, {selectedCity}, {selectedProvince} {postalCode ? `- ${postalCode}` : ''}
               </Text>
             </View>
 

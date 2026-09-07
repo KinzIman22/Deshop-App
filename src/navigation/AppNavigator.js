@@ -13,6 +13,7 @@ import CategoryProductsScreen from '../screens/CategoryProductsScreen';
 import ProductDetailScreen from '../screens/ProductDetailScreen';
 import CartScreen from '../screens/CartScreen';
 import CheckoutAddressScreen from '../screens/CheckoutAddressScreen';
+import WhyChooseScreen from '../screens/WhyChooseScreen'; // ya jo bhi aapne file ka naam rakha ho
 
 const Stack = createNativeStackNavigator();
 
@@ -37,6 +38,11 @@ export default function AppNavigator() {
   name="CheckoutAddress" 
   component={CheckoutAddressScreen} 
   options={{ headerShown: false }} 
+/>
+<Stack.Screen 
+  name="WhyChoose" 
+  component={WhyChooseScreen} 
+  options={{ headerShown: false }} // Kyunki humne code mein khud custom header banaya hai
 />
       </Stack.Navigator>
     </NavigationContainer>

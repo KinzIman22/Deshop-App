@@ -114,8 +114,11 @@ export default function HomeScreen({ navigation }) {
           </View>
         </View>
 
-        {/* Why Choose Temu Banner */}
-        <View style={styles.whyChooseBanner}>
+        {/* Why Choose deshop Banner (Clickable to Navigate) */}
+        <TouchableOpacity 
+          style={styles.whyChooseBanner}
+          onPress={() => navigation.navigate('WhyChoose')}
+        >
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             <Ionicons name="checkmark-circle" size={18} color="#FFFFFF" />
             <Text style={styles.whyChooseText}> Why choose deshop?</Text>
@@ -124,7 +127,7 @@ export default function HomeScreen({ navigation }) {
             <Text style={styles.whyChooseText}>Safe payments </Text>
             <Ionicons name="chevron-forward" size={16} color="#FFFFFF" />
           </View>
-        </View>
+        </TouchableOpacity>
 
         {/* Clearance & Lightning Deals Banners */}
         <View style={styles.dealsRow}>
