@@ -4,7 +4,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import HomeScreen from '../screens/HomeScreen';
 import CategoriesScreen from '../screens/CategoriesScreen';
 import CartScreen from '../screens/CartScreen'; 
-import ProfileScreen from '../screens/ProfileScreen'; // <-- 1. Asli Profile Screen import kar li
+import ProfileScreen from '../screens/ProfileScreen';
 
 import { Ionicons } from '@expo/vector-icons';
 
@@ -15,8 +15,13 @@ export default function BottomTabNavigator() {
     <Tab.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
-        tabBarActiveTintColor: '#F97316', // Orange theme active color
+        tabBarActiveTintColor: '#F97316',
         tabBarInactiveTintColor: '#9CA3AF',
+        // Ye line poore project ki sabhi tab screens ki stretching aur skewing ko fix kar degi:
+        sceneContainerStyle: {
+          flex: 1,
+          backgroundColor: '#FFFFFF',
+        },
         tabBarStyle: {
           backgroundColor: '#FFFFFF',
           borderTopWidth: 1,
@@ -59,7 +64,7 @@ export default function BottomTabNavigator() {
       />
       <Tab.Screen 
         name="ProfileTab" 
-        component={ProfileScreen} // <-- 2. DummyScreen ki jagah ProfileScreen laga di
+        component={ProfileScreen} 
         options={{ title: 'You' }}
       />
     </Tab.Navigator>

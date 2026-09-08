@@ -5,7 +5,6 @@ import {
   TextInput, 
   TouchableOpacity, 
   StyleSheet, 
-  SafeAreaView, 
   ScrollView, 
   Modal, 
   FlatList,
@@ -14,6 +13,7 @@ import {
   Platform 
 } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 // Pakistan Provinces List
 const PAKISTAN_PROVINCES = [
@@ -38,6 +38,8 @@ const ALL_PAKISTAN_CITIES = [
 ];
 
 export default function CheckoutAddressScreen({ navigation }) {
+  const insets = useSafeAreaInsets();
+  
   const [fullName, setFullName] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('332 7125227');
   
@@ -101,7 +103,7 @@ export default function CheckoutAddressScreen({ navigation }) {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={[styles.container, { paddingTop: insets.top }]}>
       <KeyboardAvoidingView 
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'} 
         style={{ flex: 1 }}
@@ -133,7 +135,7 @@ export default function CheckoutAddressScreen({ navigation }) {
           </View>
         </View>
 
-        <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 30 }}>
+        <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: insets.bottom + 30 }}>
           
           {/* Country Selector */}
           <View style={styles.countrySelector}>
@@ -245,7 +247,7 @@ export default function CheckoutAddressScreen({ navigation }) {
         </ScrollView>
 
         {/* Bottom Save Button */}
-        <View style={styles.footer}>
+        <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 16) }]}>
           <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
             <Text style={styles.saveButtonText}>Save & Proceed</Text>
           </TouchableOpacity>
@@ -417,7 +419,7 @@ export default function CheckoutAddressScreen({ navigation }) {
         </View>
       </Modal>
 
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -573,7 +575,7 @@ const styles = StyleSheet.create({
   editMyAddressBtn: { backgroundColor: '#EA580C', width: '100%', height: 42, borderRadius: 21, justifyContent: 'center', alignItems: 'center', marginBottom: 8 },
   editMyAddressText: { color: '#FFFFFF', fontWeight: '700', fontSize: 13 },
   isCorrectBtn: { backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#CBD5E1', width: '100%', height: 42, borderRadius: 21, justifyContent: 'center', alignItems: 'center' },
-  isCorrectText: { color: '#1E293B', fontWeight: '700', fontSize: 13 },
+  isCorrectText: { color: '#1E293B', fontWeight: '700', fontSize: '13' },
 
   // Alerts Modal Styles
   alertsModalContent: { backgroundColor: '#FFFFFF', borderRadius: 16, padding: 18, width: '100%', maxWidth: 330 },

@@ -6,13 +6,14 @@ import {
   Image,
   TouchableOpacity,
   StyleSheet,
-  SafeAreaView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CartContext } from '../context/CartContext';
 
 export default function CartScreen({ navigation }) {
   const { cartItems, updateQuantity, removeFromCart } = useContext(CartContext);
+  const insets = useSafeAreaInsets();
 
   // States for Manage / Share menu and modals
   const [menuVisible, setMenuVisible] = useState(false);
@@ -77,7 +78,7 @@ export default function CartScreen({ navigation }) {
   }, 0);
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
       {/* Top Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
@@ -326,7 +327,7 @@ export default function CartScreen({ navigation }) {
           </View>
         </View>
       )}
-    </SafeAreaView>
+    </View>
   );
 }
 

@@ -7,12 +7,12 @@ import {
   FlatList,
   TouchableOpacity,
   StyleSheet,
-  SafeAreaView,
   Image,
   ScrollView,
   Modal,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { 
   TOP_SUB_CHIPS, 
@@ -36,10 +36,48 @@ export default function CategoryProductsScreen({ route, navigation }) {
   const [selectedSize, setSelectedSize] = useState(null);
   const [selectedColor, setSelectedColor] = useState(null);
 
+  const insets = useSafeAreaInsets();
   const closeModal = () => setActiveModal(null);
 
+  // Filter and Sort Logic for SDK 57 compatibility
+  const filteredProducts = CATEGORY_PRODUCTS.filter((item) => {
+    const matchesSearch = searchQuery 
+      ? item.title.toLowerCase().includes(searchQuery.toLowerCase())
+      : true;
+
+    const activeChipObj = TOP_SUB_CHIPS.find(chip => chip.id === activeSubChip);
+    const matchesSubChip = activeChipObj 
+      ? item.title.toLowerCase().includes(activeChipObj.name.toLowerCase()) || item.tag === activeChipObj.name
+      : true;
+
+    const matchesCategory = selectedCategory 
+      ? item.category === selectedCategory || categoryTitle === selectedCategory
+      : true;
+
+    const matchesSize = selectedSize 
+      ? item.sizes && item.sizes.includes(selectedSize)
+      : true;
+
+    const matchesColor = selectedColor 
+      ? item.colors && item.colors.includes(selectedColor)
+      : true;
+
+    return matchesSearch && matchesSubChip && matchesCategory && matchesSize && matchesColor;
+  }).sort((a, b) => {
+    if (selectedSort === 'Price: Low to High') {
+      return parseFloat(a.price.replace(/[^0-9.]/g, '')) - parseFloat(b.price.replace(/[^0-9.]/g, ''));
+    }
+    if (selectedSort === 'Price: High to Low') {
+      return parseFloat(b.price.replace(/[^0-9.]/g, '')) - parseFloat(a.price.replace(/[^0-9.]/g, ''));
+    }
+    if (selectedSort === 'Rating') {
+      return b.rating - a.rating;
+    }
+    return 0;
+  });
+
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={[styles.container, { paddingTop: insets.top }]}>
       {/* Top Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
@@ -52,6 +90,7 @@ export default function CategoryProductsScreen({ route, navigation }) {
             value={searchQuery}
             onChangeText={setSearchQuery}
             placeholder="Search"
+            placeholderTextColor="#9CA3AF"
           />
           <TouchableOpacity style={styles.iconButton}>
             <Ionicons name="camera-outline" size={20} color="#4B5563" />
@@ -134,16 +173,21 @@ export default function CategoryProductsScreen({ route, navigation }) {
 
       {/* Products Grid */}
       <FlatList
-        data={CATEGORY_PRODUCTS}
+        data={filteredProducts}
         keyExtractor={(item) => item.id}
         numColumns={2}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.gridContainer}
+        contentContainerStyle={[styles.gridContainer, { paddingBottom: insets.bottom + 20 }]}
+        ListEmptyComponent={
+          <View style={{ padding: 40, alignItems: 'center' }}>
+            <Ionicons name="search-outline" size={40} color="#9CA3AF" style={{ marginBottom: 8 }} />
+            <Text style={{ color: '#6B7280', fontSize: 14 }}>No products found matching your criteria.</Text>
+          </View>
+        }
         renderItem={({ item }) => (
           <TouchableOpacity 
             style={styles.productCard}
             onPress={() => {
-              // Try standard navigation first, fallback to parent if nested inside tabs
               try {
                 navigation.navigate('ItemDetail', { product: item });
               } catch (e) {
@@ -286,14 +330,14 @@ export default function CategoryProductsScreen({ route, navigation }) {
           </View>
         </View>
       </Modal>
-    </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: '#FFFFFF',
   },
   header: {
     flexDirection: 'row',
@@ -321,6 +365,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 14,
     color: '#1F2937',
+    paddingVertical: 0,
   },
   iconButton: {
     padding: 4,

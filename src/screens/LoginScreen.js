@@ -6,18 +6,19 @@ import {
   TouchableOpacity,
   StyleSheet,
   Image,
-  SafeAreaView,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
   Alert
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const insets = useSafeAreaInsets();
 
   const handleLogin = () => {
     if (!email || !password) {
@@ -28,14 +29,18 @@ export default function LoginScreen({ navigation }) {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={{ flex: 1 }}
       >
-        <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
+        <ScrollView 
+          contentContainerStyle={styles.scrollContainer} 
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
           
-          {/* Top Logo - Increased by 20% (96px instead of 80px) */}
+          {/* Top Logo */}
           <View style={styles.headerContainer}>
             <Image
               source={require('../../assets/Logo/logo.png')}
@@ -163,7 +168,7 @@ export default function LoginScreen({ navigation }) {
 
         </ScrollView>
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -176,26 +181,26 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     justifyContent: 'center',
     paddingHorizontal: 24,
-    paddingVertical: 30,
+    paddingVertical: 20,
   },
   headerContainer: {
     alignItems: 'center',
-    marginBottom: 25,
+    marginBottom: 20,
   },
   logo: {
-    width: 130,
-    height: 130,
-    marginBottom: 10,
+    width: 110,
+    height: 110,
+    marginBottom: 8,
   },
   welcomeText: {
-    fontSize: 26,
+    fontSize: 24,
     fontWeight: '700',
     color: '#111827',
-    marginBottom: 6,
+    marginBottom: 4,
     letterSpacing: -0.5,
   },
   subText: {
-    fontSize: 14,
+    fontSize: 13,
     color: '#6B7280',
     textAlign: 'center',
   },
@@ -203,10 +208,10 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   inputGroup: {
-    marginBottom: 16,
+    marginBottom: 14,
   },
   label: {
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: '600',
     color: '#374151',
     marginBottom: 6,
@@ -220,58 +225,58 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#E5E7EB',
     borderRadius: 12,
-    paddingHorizontal: 14,
+    paddingHorizontal: 12,
   },
   inputIcon: {
-    marginRight: 10,
+    marginRight: 8,
   },
   inputWithIcon: {
     flex: 1,
-    paddingVertical: 14,
-    fontSize: 15,
+    paddingVertical: 12,
+    fontSize: 14,
     color: '#1F2937',
   },
   passwordInput: {
     flex: 1,
-    paddingVertical: 14,
-    fontSize: 15,
+    paddingVertical: 12,
+    fontSize: 14,
     color: '#1F2937',
-    marginLeft: 10,
+    marginLeft: 6,
   },
   eyeIcon: {
     padding: 4,
   },
   forgotContainer: {
     alignItems: 'flex-end',
-    marginBottom: 18,
+    marginBottom: 16,
   },
   forgotText: {
     color: '#2563EB',
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '600',
   },
   primaryBtn: {
     backgroundColor: '#2563EB',
     borderRadius: 12,
-    paddingVertical: 16,
+    paddingVertical: 14,
     alignItems: 'center',
     shadowColor: '#2563EB',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.25,
     shadowRadius: 8,
     elevation: 4,
-    marginBottom: 20,
+    marginBottom: 16,
   },
   primaryBtnText: {
     color: '#FFFFFF',
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '600',
     letterSpacing: 0.3,
   },
   dividerContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 16,
   },
   line: {
     flex: 1,
@@ -279,32 +284,32 @@ const styles = StyleSheet.create({
     backgroundColor: '#E5E7EB',
   },
   dividerText: {
-    marginHorizontal: 12,
+    marginHorizontal: 10,
     color: '#9CA3AF',
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: '700',
     letterSpacing: 0.8,
   },
   socialContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    marginBottom: 24,
+    marginBottom: 20,
   },
   socialTouchable: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 8,
-    paddingHorizontal: 12,
+    paddingVertical: 6,
+    paddingHorizontal: 8,
   },
   socialIconImage: {
-    width: 22,
-    height: 22,
-    marginRight: 8,
+    width: 20,
+    height: 20,
+    marginRight: 6,
   },
   socialText: {
     color: '#374151',
     fontWeight: '600',
-    fontSize: 14,
+    fontSize: 13,
   },
   footerContainer: {
     flexDirection: 'row',
@@ -313,11 +318,11 @@ const styles = StyleSheet.create({
   },
   noAccountText: {
     color: '#6B7280',
-    fontSize: 14,
+    fontSize: 13,
   },
   linkText: {
     color: '#2563EB',
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '600',
   },
 });

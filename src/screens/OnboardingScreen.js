@@ -6,9 +6,9 @@ import {
   Dimensions,
   FlatList,
   TouchableOpacity,
-  Image,
-  SafeAreaView
+  Image
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const { width } = Dimensions.get('window');
 
@@ -36,8 +36,9 @@ const slides = [
 export default function OnboardingScreen({ navigation }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const flatListRef = useRef(null);
+  const insets = useSafeAreaInsets(); // Modern safe area handling
 
-  // Auto-scroll every 2 seconds
+  // Auto-scroll every 3 seconds
   useEffect(() => {
     const interval = setInterval(() => {
       if (currentIndex < slides.length - 1) {
@@ -53,7 +54,7 @@ export default function OnboardingScreen({ navigation }) {
         });
         setCurrentIndex(0);
       }
-    }, 2000);
+    }, 3000);
 
     return () => clearInterval(interval);
   }, [currentIndex]);
@@ -77,7 +78,7 @@ export default function OnboardingScreen({ navigation }) {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
       {/* Skip Button */}
       <TouchableOpacity style={styles.skipBtn} onPress={handleSkip}>
         <Text style={styles.skipText}>Skip</Text>
@@ -121,7 +122,7 @@ export default function OnboardingScreen({ navigation }) {
           </Text>
         </TouchableOpacity>
       </View>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -144,35 +145,36 @@ const styles = StyleSheet.create({
   },
   slide: {
     width: width,
+    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 40,
   },
   image: {
-    width: width * 0.6,
-    height: width * 0.6,
-    marginBottom: 40,
+    width: width * 0.55,
+    height: width * 0.55,
+    marginBottom: 30,
   },
   title: {
-    fontSize: 26,
+    fontSize: 24,
     fontWeight: 'bold',
     color: '#111',
     textAlign: 'center',
-    marginBottom: 15,
+    marginBottom: 12,
   },
   description: {
-    fontSize: 15,
+    fontSize: 14,
     color: '#666',
     textAlign: 'center',
-    lineHeight: 22,
+    lineHeight: 20,
   },
   footer: {
-    height: 100,
+    height: 90,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 30,
-    marginBottom: 20,
+    marginBottom: 10,
   },
   dotsContainer: {
     flexDirection: 'row',

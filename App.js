@@ -1,11 +1,22 @@
 import React from 'react';
-import { CartProvider } from './src/context/CartContext'; // Path apne project ke mutabiq check kar lein
-import AppNavigator from './src/navigation/AppNavigator'; // Ya jo bhi aapka main navigator ho
+import { View, StyleSheet, StatusBar } from 'react-native';
+import { CartProvider } from './src/context/CartContext'; 
+import AppNavigator from './src/navigation/AppNavigator'; 
 
 export default function App() {
   return (
-    <CartProvider>
-      <AppNavigator />
-    </CartProvider>
+    <View style={styles.rootContainer}>
+      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" translucent={false} />
+      <CartProvider>
+        <AppNavigator />
+      </CartProvider>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  rootContainer: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+  },
+});

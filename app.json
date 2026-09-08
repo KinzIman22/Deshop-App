@@ -6,11 +6,6 @@
     "orientation": "portrait",
     "icon": "./assets/Logo/logo.png",
     "userInterfaceStyle": "light",
-    "splash": {
-      "image": "./assets/Logo/logo.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#FFFFFF"
-    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.anonymous.deshopapp"
@@ -24,6 +19,9 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "plugins": [
+      "expo-status-bar"
+    ]
   }
 }

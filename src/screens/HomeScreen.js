@@ -6,11 +6,11 @@ import {
   FlatList, 
   TouchableOpacity, 
   StyleSheet, 
-  SafeAreaView,
   ScrollView,
   Alert 
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import ProductCard from '../components/ProductCard';
 import { TOP_CATEGORIES, SUB_CATEGORIES, PRODUCTS } from '../api/mockData';
@@ -20,6 +20,7 @@ export default function HomeScreen({ navigation }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTopCat, setActiveTopCat] = useState('1');
   const [activeSubCat, setActiveSubCat] = useState('s1');
+  const insets = useSafeAreaInsets();
 
   // Cart Context se addToCart function nikala
   const { addToCart } = useContext(CartContext);
@@ -42,7 +43,7 @@ export default function HomeScreen({ navigation }) {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={[styles.container, { paddingTop: insets.top }]}>
       
       {/* Top Search Header */}
       <View style={styles.searchHeader}>
@@ -94,7 +95,10 @@ export default function HomeScreen({ navigation }) {
         />
       </View>
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 20 }}>
+      <ScrollView 
+        showsVerticalScrollIndicator={false} 
+        contentContainerStyle={{ paddingBottom: insets.bottom + 20 }}
+      >
         
         {/* Promotional Banner Box */}
         <View style={styles.promoBox}>
@@ -188,11 +192,13 @@ export default function HomeScreen({ navigation }) {
               keyExtractor={(item) => item.id}
               numColumns={2}
               scrollEnabled={false}
+              columnWrapperStyle={styles.columnWrapper}
               renderItem={({ item }) => (
                 <ProductCard 
                   item={item} 
                   onPress={() => navigation.getParent()?.navigate('ItemDetail', { product: item })} 
                   onAddToCart={() => handleAddToCart(item)}
+                  cartIconColor="#F97316"
                 />
               )}
             />
@@ -205,21 +211,22 @@ export default function HomeScreen({ navigation }) {
         </View>
 
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: '#FFFFFF', // Ab top se le kar end tak white background clean look dega
   },
   searchHeader: {
     flexDirection: 'row',
     paddingHorizontal: 12,
-    paddingVertical: 8,
+    paddingVertical: 10,
     backgroundColor: '#FFFFFF',
     alignItems: 'center',
+    justifyContent: 'space-between',
   },
   searchBar: {
     flex: 1,
@@ -228,22 +235,23 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     alignItems: 'center',
     paddingHorizontal: 12,
-    height: 40,
-    marginRight: 8,
+    height: 42,
+    marginRight: 10,
   },
   searchInput: {
     flex: 1,
     fontSize: 14,
     color: '#1F2937',
+    paddingVertical: 0,
   },
   cameraIconBtn: {
     padding: 4,
   },
   searchIconButton: {
-    width: 40,
-    height: 40,
+    width: 42,
+    height: 42,
     backgroundColor: '#000000',
-    borderRadius: 20,
+    borderRadius: 21,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -355,9 +363,9 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   activeSubChip: {
-    backgroundColor: '#F97316',
+    backgroundColor: '#E5E7EB',
     borderWidth: 1,
-    borderColor: '#F97316',
+    borderColor: '#000000',
   },
   subCatText: {
     fontSize: 13,
@@ -365,11 +373,15 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   activeSubText: {
-    color: '#FFFFFF',
+    color: '#000000',
     fontWeight: '700',
   },
   gridContainer: {
     paddingHorizontal: 8,
+  },
+  columnWrapper: {
+    justifyContent: 'space-between',
+    paddingHorizontal: 4,
   },
   noDataContainer: {
     padding: 40,

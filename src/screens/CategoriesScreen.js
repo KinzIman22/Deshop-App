@@ -6,28 +6,33 @@ import {
   FlatList, 
   TouchableOpacity, 
   StyleSheet, 
-  SafeAreaView,
   Image,
-  ScrollView 
+  Dimensions 
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-// Data ko alag file se import kar liya
 import { LEFT_CATEGORIES, SUB_CATEGORIES_DATA } from '../data/categoriesData';
-// Available Offers Modal import kiya
 import AvailableOffersModal from '../components/AvailableOffersModal';
+
+const { width } = Dimensions.get('window');
+const RIGHT_CONTENT_WIDTH = width - 115; // Total width minus left sidebar width
 
 export default function CategoriesScreen({ navigation }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeLeftCat, setActiveLeftCat] = useState('1');
-  
-  // Modal visibility state
   const [modalVisible, setModalVisible] = useState(false);
+  const insets = useSafeAreaInsets();
 
-  const currentSubCategories = SUB_CATEGORIES_DATA[activeLeftCat] || SUB_CATEGORIES_DATA['1'];
+  // Combine "View All" card with current subcategories list
+  const rawSubCategories = SUB_CATEGORIES_DATA[activeLeftCat] || SUB_CATEGORIES_DATA['1'];
+  const gridData = [
+    { id: 'view-all-card', name: 'View All', isViewAll: true },
+    ...rawSubCategories
+  ];
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
       {/* Top Search Header */}
       <View style={styles.searchHeader}>
         <View style={styles.searchBar}>
@@ -47,7 +52,7 @@ export default function CategoriesScreen({ navigation }) {
         </TouchableOpacity>
       </View>
 
-      {/* Promotional Banner Info Bar (Clickable to open Available Offers Modal) */}
+      {/* Promotional Banner Info Bar */}
       <TouchableOpacity 
         style={styles.infoBar}
         onPress={() => setModalVisible(true)}
@@ -65,6 +70,7 @@ export default function CategoriesScreen({ navigation }) {
 
       {/* Main Body Split Layout */}
       <View style={styles.bodyContainer}>
+        
         {/* Left Vertical Categories Menu */}
         <View style={styles.leftContainer}>
           <FlatList
@@ -79,7 +85,7 @@ export default function CategoriesScreen({ navigation }) {
                   onPress={() => setActiveLeftCat(item.id)}
                 >
                   {isSelected && <View style={styles.activeLeftIndicator} />}
-                  <Text style={[styles.leftItemText, isSelected && styles.activeLeftItemText]}>
+                  <Text style={[styles.leftItemText, isSelected && styles.activeLeftItemText]} numberOfLines={2}>
                     {item.name}
                   </Text>
                 </TouchableOpacity>
@@ -88,44 +94,49 @@ export default function CategoriesScreen({ navigation }) {
           />
         </View>
 
-        {/* Right Sub-Categories Grid */}
+        {/* Right Sub-Categories Grid (Strictly 3 Columns with safe padding) */}
         <View style={styles.rightContainer}>
-          <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ padding: 12 }}>
-            <View style={styles.gridRow}>
-              
-              {/* View All Card */}
-              <TouchableOpacity 
-                style={styles.subCategoryCard}
-                onPress={() => navigation.navigate('CategoryProducts', { categoryId: activeLeftCat })}
-              >
-                <View style={styles.viewAllCircle}>
-                  <Ionicons name="grid" size={24} color="#4B5563" />
-                </View>
-                <Text style={styles.subCatText}>View All</Text>
-              </TouchableOpacity>
+          <FlatList
+            data={gridData}
+            keyExtractor={(item) => item.id.toString()}
+            numColumns={3}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ padding: 10, paddingBottom: 100 }}
+            renderItem={({ item }) => {
+              if (item.isViewAll) {
+                return (
+                  <TouchableOpacity 
+                    style={styles.subCategoryCard}
+                    onPress={() => navigation.navigate('CategoryProducts', { categoryId: activeLeftCat })}
+                  >
+                    <View style={styles.viewAllCircle}>
+                      <Ionicons name="grid" size={22} color="#4B5563" />
+                    </View>
+                    <Text style={styles.subCatText} numberOfLines={1}>View All</Text>
+                  </TouchableOpacity>
+                );
+              }
 
-              {/* Mapped Subcategories */}
-              {currentSubCategories.map((sub) => (
+              return (
                 <TouchableOpacity 
-                  key={sub.id} 
                   style={styles.subCategoryCard}
-                  onPress={() => navigation.navigate('CategoryProducts', { subCategory: sub.name })}
+                  onPress={() => navigation.navigate('CategoryProducts', { subCategory: item.name })}
                 >
                   <View style={styles.imageContainer}>
-                    <Image source={{ uri: sub.image }} style={styles.subCatImage} />
-                    {sub.isHot && (
+                    <Image source={{ uri: item.image }} style={styles.subCatImage} />
+                    {item.isHot && (
                       <View style={styles.hotBadge}>
                         <Text style={styles.hotText}>HOT</Text>
                       </View>
                     )}
                   </View>
-                  <Text style={styles.subCatText} numberOfLines={2}>{sub.name}</Text>
+                  <Text style={styles.subCatText} numberOfLines={2}>{item.name}</Text>
                 </TouchableOpacity>
-              ))}
-
-            </View>
-          </ScrollView>
+              );
+            }}
+          />
         </View>
+
       </View>
 
       {/* Available Offers Bottom Sheet Modal */}
@@ -133,7 +144,7 @@ export default function CategoriesScreen({ navigation }) {
         visible={modalVisible} 
         onClose={() => setModalVisible(false)} 
       />
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -167,6 +178,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 14,
     color: '#1F2937',
+    paddingVertical: 0,
   },
   cameraIconBtn: {
     padding: 4,
@@ -201,18 +213,20 @@ const styles = StyleSheet.create({
   bodyContainer: {
     flex: 1,
     flexDirection: 'row',
+    width: '100%',
   },
   leftContainer: {
-    width: '32%',
+    width: 115,
     backgroundColor: '#F9FAFB',
     borderRightWidth: 1,
     borderRightColor: '#E5E7EB',
   },
   leftItem: {
     paddingVertical: 14,
-    paddingHorizontal: 10,
+    paddingHorizontal: 8,
     justifyContent: 'center',
     position: 'relative',
+    minHeight: 50,
   },
   activeLeftItem: {
     backgroundColor: '#FFFFFF',
@@ -227,7 +241,7 @@ const styles = StyleSheet.create({
     borderRadius: 2,
   },
   leftItemText: {
-    fontSize: 13,
+    fontSize: 12,
     color: '#4B5563',
     fontWeight: '500',
   },
@@ -239,20 +253,16 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#FFFFFF',
   },
-  gridRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-  },
   subCategoryCard: {
     width: '31%',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 18,
+    marginHorizontal: '1%',
   },
   viewAllCircle: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
+    width: 58,
+    height: 58,
+    borderRadius: 29,
     backgroundColor: '#F3F4F6',
     justifyContent: 'center',
     alignItems: 'center',
@@ -265,9 +275,9 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   subCatImage: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
+    width: 58,
+    height: 58,
+    borderRadius: 29,
     backgroundColor: '#F3F4F6',
   },
   hotBadge: {
