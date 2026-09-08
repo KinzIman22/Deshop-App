@@ -38,18 +38,19 @@ export default function OnboardingScreen({ navigation }) {
   const flatListRef = useRef(null);
   const insets = useSafeAreaInsets(); // Modern safe area handling
 
-  // Auto-scroll every 3 seconds
+  // Auto-scroll every 3 seconds using scrollToOffset to prevent index errors
   useEffect(() => {
     const interval = setInterval(() => {
       if (currentIndex < slides.length - 1) {
-        flatListRef.current?.scrollToIndex({
-          index: currentIndex + 1,
+        const nextIndex = currentIndex + 1;
+        flatListRef.current?.scrollToOffset({
+          offset: nextIndex * width,
           animated: true,
         });
-        setCurrentIndex(currentIndex + 1);
+        setCurrentIndex(nextIndex);
       } else {
-        flatListRef.current?.scrollToIndex({
-          index: 0,
+        flatListRef.current?.scrollToOffset({
+          offset: 0,
           animated: true,
         });
         setCurrentIndex(0);
@@ -67,7 +68,12 @@ export default function OnboardingScreen({ navigation }) {
 
   const handleNext = () => {
     if (currentIndex < slides.length - 1) {
-      flatListRef.current.scrollToIndex({ index: currentIndex + 1, animated: true });
+      const nextIndex = currentIndex + 1;
+      flatListRef.current?.scrollToOffset({
+        offset: nextIndex * width,
+        animated: true,
+      });
+      setCurrentIndex(nextIndex);
     } else {
       navigation.replace('Login');
     }
@@ -93,6 +99,12 @@ export default function OnboardingScreen({ navigation }) {
         showsHorizontalScrollIndicator={false}
         onMomentumScrollEnd={handleMomentumScrollEnd}
         keyExtractor={(item) => item.id}
+        // getItemLayout helps FlatList calculate positions instantly and avoids errors
+        getItemLayout={(data, index) => ({
+          length: width,
+          offset: width * index,
+          index,
+        })}
         renderItem={({ item }) => (
           <View style={styles.slide}>
             <Image source={item.image} style={styles.image} resizeMode="contain" />

@@ -40,6 +40,8 @@ export default function ProductDetailScreen({ navigation, route }) {
   const [userRating, setUserRating] = useState(5);
   const [reviewText, setReviewText] = useState('');
   const [reviewImage, setReviewImage] = useState(null);
+  
+  // Base initial mock reviews
   const [reviewsList, setReviewsList] = useState([
     {
       id: '1',
@@ -124,6 +126,16 @@ export default function ProductDetailScreen({ navigation, route }) {
     Alert.alert("Thank You!", "Your review has been added successfully.");
   };
 
+  // Dynamically compute average rating and total reviews count
+  const baseTotalReviewsCount = Number(PRODUCT_DETAIL_DATA.reviewsSummary?.totalReviews || 450);
+  const totalReviewsCount = baseTotalReviewsCount + reviewsList.length;
+
+  const computedAverageRating = (() => {
+    const baseRatingSum = Number(PRODUCT_DETAIL_DATA.reviewsSummary?.rating || 4.8) * baseTotalReviewsCount;
+    const userReviewsSum = reviewsList.reduce((acc, rev) => acc + rev.rating, 0);
+    return ((baseRatingSum + userReviewsSum) / totalReviewsCount).toFixed(1);
+  })();
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 90 }}>
@@ -185,7 +197,7 @@ export default function ProductDetailScreen({ navigation, route }) {
           </View>
           <Text style={styles.productTitle}>{productItem.title}</Text>
           <View style={styles.ratingRow}>
-            <Text style={styles.ratingNum}>{productItem.rating || "4.8"}</Text>
+            <Text style={styles.ratingNum}>{computedAverageRating}</Text>
             <Ionicons name="star" size={12} color="#F59E0B" style={{ marginLeft: 2 }} />
             <Text style={styles.soldNum}> • {productItem.sold || "1k+ sold"}</Text>
           </View>
@@ -222,13 +234,13 @@ export default function ProductDetailScreen({ navigation, route }) {
             onPress={() => setIsReviewModalVisible(true)}
           >
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <Text style={styles.ratingNum}>{PRODUCT_DETAIL_DATA.reviewsSummary.rating}</Text>
+              <Text style={styles.ratingNum}>{computedAverageRating}</Text>
               <View style={{ flexDirection: 'row', marginLeft: 6 }}>
                 {[1, 2, 3, 4, 5].map((_, i) => (
                   <Ionicons key={i} name="star" size={14} color="#F59E0B" />
                 ))}
               </View>
-              <Text style={styles.reviewCountText}> ({reviewsList.length + Number(PRODUCT_DETAIL_DATA.reviewsSummary.totalReviews)})</Text>
+              <Text style={styles.reviewCountText}> ({totalReviewsCount})</Text>
             </View>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <Text style={{ fontSize: 12, color: '#EA580C', fontWeight: 'bold', marginRight: 4 }}>Write Review</Text>

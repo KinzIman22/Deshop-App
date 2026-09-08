@@ -575,7 +575,7 @@ const styles = StyleSheet.create({
   editMyAddressBtn: { backgroundColor: '#EA580C', width: '100%', height: 42, borderRadius: 21, justifyContent: 'center', alignItems: 'center', marginBottom: 8 },
   editMyAddressText: { color: '#FFFFFF', fontWeight: '700', fontSize: 13 },
   isCorrectBtn: { backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#CBD5E1', width: '100%', height: 42, borderRadius: 21, justifyContent: 'center', alignItems: 'center' },
-  isCorrectText: { color: '#1E293B', fontWeight: '700', fontSize: '13' },
+  isCorrectText: { color: '#1E293B', fontWeight: '700', fontSize: 13 },
 
   // Alerts Modal Styles
   alertsModalContent: { backgroundColor: '#FFFFFF', borderRadius: 16, padding: 18, width: '100%', maxWidth: 330 },
