@@ -15,6 +15,9 @@ import {
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+// Apni app ke path ke mutabiq ThemeContext import karein (e.g., '../context/ThemeContext')
+import { useTheme } from '../context/ThemeContext';
+
 // Pakistan Provinces List
 const PAKISTAN_PROVINCES = [
   'Punjab', 
@@ -40,14 +43,25 @@ const ALL_PAKISTAN_CITIES = [
 export default function CheckoutAddressScreen({ navigation }) {
   const insets = useSafeAreaInsets();
   
+  // Aapke custom ThemeContext hook se state aur colors nikal liye hain
+  const { isDarkMode, colors } = useTheme();
+
+  // Checkout Steps: 'address' | 'payment' | 'review'
+  const [checkoutStep, setCheckoutStep] = useState('address');
+
+  // Address States
   const [fullName, setFullName] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('332 7125227');
-  
-  // Separate states for Province and City
   const [selectedProvince, setSelectedProvince] = useState('Punjab');
   const [selectedCity, setSelectedCity] = useState('Lahore');
   const [address, setAddress] = useState('');
   const [postalCode, setPostalCode] = useState('');
+
+  // Payment States
+  const [paymentMethod, setPaymentMethod] = useState('COD'); // 'COD' or 'CARD'
+  const [cardNumber, setCardNumber] = useState('');
+  const [cardExpiry, setCardExpiry] = useState('');
+  const [cardCvv, setCardCvv] = useState('');
 
   // Selector Modal States
   const [modalVisible, setModalVisible] = useState(false);
@@ -65,7 +79,23 @@ export default function CheckoutAddressScreen({ navigation }) {
   const [line2Green, setLine2Green] = useState(false);
   const [step3Green, setStep3Green] = useState(false);
 
-  // Filter list data based on type with search query
+  // Theme mapping based strictly on your ThemeContext structure
+  const currentTheme = {
+    bg: colors.background,
+    card: colors.cardBg,
+    cardElevated: colors.inputBg,
+    text: colors.textPrimary,
+    textSecondary: colors.textSecondary,
+    border: colors.borderColor,
+    inputBg: colors.inputBg,
+    inputBorder: colors.borderColor,
+    accent: '#EA580C', // Primary accent color
+    success: '#16A34A',
+    promoBg: isDarkMode ? '#064E3B' : '#ECFDF5',
+    promoBorder: isDarkMode ? '#065F46' : '#A7F3D0',
+    promoText: isDarkMode ? '#6EE7B7' : '#047857',
+  };
+
   const getModalData = () => {
     if (modalType === 'province') {
       return PAKISTAN_PROVINCES.filter(p => 
@@ -77,11 +107,25 @@ export default function CheckoutAddressScreen({ navigation }) {
     }
   };
 
-  const handleSave = () => {
+  const handleProceedFromAddress = () => {
     if (!fullName.trim() || !address.trim() || !selectedCity.trim()) {
-      Alert.alert("Error", "Please fill in all mandatory fields.");
+      Alert.alert("Error", "Please fill in all mandatory address fields.");
       return;
     }
+    setCheckoutStep('payment');
+  };
+
+  const handleProceedFromPayment = () => {
+    if (paymentMethod === 'CARD') {
+      if (!cardNumber.trim() || !cardExpiry.trim() || !cardCvv.trim()) {
+        Alert.alert("Error", "Please enter valid credit/debit card details.");
+        return;
+      }
+    }
+    setCheckoutStep('review');
+  };
+
+  const handlePlaceOrder = () => {
     setShowWarningModal(true);
   };
 
@@ -102,200 +146,377 @@ export default function CheckoutAddressScreen({ navigation }) {
     setTimeout(() => { setStep3Green(true); }, 3000);
   };
 
-  // Fixed Global Theme Colors (Dark Theme Removed)
-  const theme = {
-    bg: '#121212',
-    card: '#1E1E1E',
-    text: '#F3F4F6',
-    textSecondary: '#9CA3AF',
-    border: '#2D2D2D',
-    inputBg: '#252525',
-    inputBorder: '#3F3F46',
-    promoBg: '#064E3B',
-    promoBorder: '#065F46',
-    promoText: '#6EE7B7',
-    modalOverlay: 'rgba(0, 0, 0, 0.7)',
+  const getHeaderTitle = () => {
+    if (checkoutStep === 'address') return 'Add an address to order';
+    if (checkoutStep === 'payment') return 'Select Payment Method';
+    if (checkoutStep === 'review') return 'Order Review';
+  };
+
+  const handleBackPress = () => {
+    if (checkoutStep === 'review') {
+      setCheckoutStep('payment');
+    } else if (checkoutStep === 'payment') {
+      setCheckoutStep('address');
+    } else {
+      navigation.goBack();
+    }
   };
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top, backgroundColor: theme.bg }]}>
+    <View style={[styles.container, { paddingTop: insets.top, backgroundColor: currentTheme.bg }]}>
       <KeyboardAvoidingView 
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'} 
         style={{ flex: 1 }}
       >
         {/* Top Header */}
-        <View style={[styles.header, { backgroundColor: theme.card, borderBottomColor: theme.border }]}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={[styles.backBtn, { backgroundColor: '#2D2D2D' }]}>
-            <Ionicons name="chevron-back" size={22} color={theme.text} />
+        <View style={[styles.header, { backgroundColor: currentTheme.card, borderBottomColor: currentTheme.border }]}>
+          <TouchableOpacity onPress={handleBackPress} style={[styles.backBtn, { backgroundColor: currentTheme.cardElevated }]}>
+            <Ionicons name="chevron-back" size={22} color={currentTheme.text} />
           </TouchableOpacity>
-          <Text style={[styles.headerTitle, { color: theme.text }]}>Add an address to order</Text>
+          <Text style={[styles.headerTitle, { color: currentTheme.text }]}>{getHeaderTitle()}</Text>
           <View style={{ width: 32 }} />
         </View>
 
+        {/* Step Indicator Progress Bar */}
+        <View style={[styles.stepBarContainer, { backgroundColor: currentTheme.card, borderBottomColor: currentTheme.border }]}>
+          <View style={styles.stepIndicatorItem}>
+            <View style={[styles.miniDot, { backgroundColor: currentTheme.textSecondary }, checkoutStep === 'address' && { backgroundColor: currentTheme.accent, width: 10, height: 10, borderRadius: 5 }]} />
+            <Text style={[styles.miniDotText, { color: currentTheme.textSecondary }, checkoutStep === 'address' && { color: currentTheme.accent }]}>Address</Text>
+          </View>
+          <View style={[styles.miniLine, { backgroundColor: currentTheme.border }, (checkoutStep === 'payment' || checkoutStep === 'review') && { backgroundColor: currentTheme.accent }]} />
+          <View style={styles.stepIndicatorItem}>
+            <View style={[styles.miniDot, { backgroundColor: currentTheme.textSecondary }, checkoutStep === 'payment' && { backgroundColor: currentTheme.accent, width: 10, height: 10, borderRadius: 5 }]} />
+            <Text style={[styles.miniDotText, { color: currentTheme.textSecondary }, checkoutStep === 'payment' && { color: currentTheme.accent }]}>Payment</Text>
+          </View>
+          <View style={[styles.miniLine, { backgroundColor: currentTheme.border }, checkoutStep === 'review' && { backgroundColor: currentTheme.accent }]} />
+          <View style={styles.stepIndicatorItem}>
+            <View style={[styles.miniDot, { backgroundColor: currentTheme.textSecondary }, checkoutStep === 'review' && { backgroundColor: currentTheme.accent, width: 10, height: 10, borderRadius: 5 }]} />
+            <Text style={[styles.miniDotText, { color: currentTheme.textSecondary }, checkoutStep === 'review' && { color: currentTheme.accent }]}>Review</Text>
+          </View>
+        </View>
+
         {/* Safeguard Secure Banner */}
-        <View style={[styles.secureContainer, { backgroundColor: theme.card, borderBottomColor: theme.bg }]}>
-          <Ionicons name="lock-closed" size={13} color="#16A34A" />
-          <Text style={styles.secureText}> All data is safeguarded</Text>
+        <View style={[styles.secureContainer, { backgroundColor: currentTheme.card, borderBottomColor: currentTheme.bg }]}>
+          <Ionicons name="lock-closed" size={13} color={currentTheme.success} />
+          <Text style={[styles.secureText, { color: currentTheme.success }]}> All data is safeguarded</Text>
         </View>
 
         {/* Free Shipping Highlight Banner */}
-        <View style={[styles.promoBanner, { backgroundColor: theme.promoBg, borderBottomColor: theme.promoBorder }]}>
+        <View style={[styles.promoBanner, { backgroundColor: currentTheme.promoBg, borderBottomColor: currentTheme.promoBorder }]}>
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <Ionicons name="checkmark-circle" size={15} color="#16A34A" />
-            <Text style={[styles.promoText, { color: theme.promoText }]}> Free shipping</Text>
+            <Ionicons name="checkmark-circle" size={15} color={currentTheme.success} />
+            <Text style={[styles.promoText, { color: currentTheme.promoText }]}> Free shipping</Text>
           </View>
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <Ionicons name="checkmark-circle" size={15} color="#16A34A" />
-            <Text style={[styles.promoText, { color: theme.promoText }]}> 30-day price adjustment</Text>
+            <Ionicons name="checkmark-circle" size={15} color={currentTheme.success} />
+            <Text style={[styles.promoText, { color: currentTheme.promoText }]}> 30-day price adjustment</Text>
           </View>
         </View>
 
         <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: insets.bottom + 30 }}>
           
-          {/* Country Selector */}
-          <View style={[styles.countrySelector, { backgroundColor: theme.card, borderColor: theme.border }]}>
-            <Text style={[styles.countryLabel, { color: theme.textSecondary }]}>Country / Region</Text>
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <Text style={{ fontWeight: '700', color: theme.text, marginRight: 4 }}>Pakistan</Text>
-              <Ionicons name="shield-checkmark" size={16} color="#16A34A" />
-            </View>
-          </View>
+          {/* ================= STEP 1: ADDRESS FORM ================= */}
+          {checkoutStep === 'address' && (
+            <>
+              {/* Country Selector */}
+              <View style={[styles.countrySelector, { backgroundColor: currentTheme.card, borderColor: currentTheme.border }]}>
+                <Text style={[styles.countryLabel, { color: currentTheme.textSecondary }]}>Country / Region</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <Text style={{ fontWeight: '700', color: currentTheme.text, marginRight: 4 }}>Pakistan</Text>
+                  <Ionicons name="shield-checkmark" size={16} color={currentTheme.success} />
+                </View>
+              </View>
 
-          {/* Full Name */}
-          <View style={styles.inputGroup}>
-            <Text style={[styles.label, { color: theme.text }]}>Full name <Text style={{ color: '#EA580C' }}>*</Text></Text>
-            <View style={[styles.inputContainer, { backgroundColor: theme.inputBg, borderColor: theme.inputBorder }]}>
-              <TextInput 
-                style={[styles.input, { color: theme.text }]}
-                placeholder="Enter full name"
-                value={fullName}
-                onChangeText={setFullName}
-                placeholderTextColor={theme.textSecondary}
-              />
-              {fullName.length > 0 && (
-                <TouchableOpacity onPress={() => setFullName('')}>
-                  <Ionicons name="close-circle" size={18} color={theme.textSecondary} />
+              {/* Full Name */}
+              <View style={styles.inputGroup}>
+                <Text style={[styles.label, { color: currentTheme.text }]}>Full name <Text style={{ color: currentTheme.accent }}>*</Text></Text>
+                <View style={[styles.inputContainer, { backgroundColor: currentTheme.inputBg, borderColor: currentTheme.inputBorder }]}>
+                  <TextInput 
+                    style={[styles.input, { color: currentTheme.text }]}
+                    placeholder="Enter full name"
+                    value={fullName}
+                    onChangeText={setFullName}
+                    placeholderTextColor={currentTheme.textSecondary}
+                  />
+                  {fullName.length > 0 && (
+                    <TouchableOpacity onPress={() => setFullName('')}>
+                      <Ionicons name="close-circle" size={18} color={currentTheme.textSecondary} />
+                    </TouchableOpacity>
+                  )}
+                </View>
+              </View>
+
+              {/* Phone Number */}
+              <View style={styles.inputGroup}>
+                <Text style={[styles.label, { color: currentTheme.text }]}>Phone number <Text style={{ color: currentTheme.accent }}>*</Text></Text>
+                <View style={[styles.inputContainer, { paddingHorizontal: 0, backgroundColor: currentTheme.inputBg, borderColor: currentTheme.inputBorder }]}>
+                  <View style={styles.phonePrefix}>
+                    <Text style={{ fontWeight: '600', color: currentTheme.text, fontSize: 13 }}>PK +92</Text>
+                    <View style={[styles.verticalDivider, { backgroundColor: currentTheme.inputBorder }]} />
+                  </View>
+                  <TextInput 
+                    style={[styles.input, { paddingLeft: 8, color: currentTheme.text }]}
+                    value={phoneNumber}
+                    onChangeText={setPhoneNumber}
+                    keyboardType="phone-pad"
+                    placeholderTextColor={currentTheme.textSecondary}
+                  />
+                </View>
+              </View>
+
+              {/* Province Field */}
+              <View style={styles.inputGroup}>
+                <Text style={[styles.label, { color: currentTheme.text }]}>Province <Text style={{ color: currentTheme.accent }}>*</Text></Text>
+                <TouchableOpacity 
+                  style={[styles.dropdownContainer, { backgroundColor: currentTheme.inputBg, borderColor: currentTheme.inputBorder }]} 
+                  onPress={() => {
+                    setModalType('province');
+                    setSearchQuery('');
+                    setModalVisible(true);
+                  }}
+                >
+                  <Text style={{ color: currentTheme.text, fontWeight: '600' }}>{selectedProvince}</Text>
+                  <Ionicons name="chevron-down" size={18} color={currentTheme.textSecondary} />
                 </TouchableOpacity>
+              </View>
+
+              {/* City Field */}
+              <View style={styles.inputGroup}>
+                <Text style={[styles.label, { color: currentTheme.text }]}>City <Text style={{ color: currentTheme.accent }}>*</Text></Text>
+                <TouchableOpacity 
+                  style={[styles.dropdownContainer, { backgroundColor: currentTheme.inputBg, borderColor: currentTheme.inputBorder }]} 
+                  onPress={() => {
+                    setModalType('city');
+                    setSearchQuery('');
+                    setModalVisible(true);
+                  }}
+                >
+                  <Text style={{ color: currentTheme.text, fontWeight: '600' }}>{selectedCity || 'Select City'}</Text>
+                  <Ionicons name="search-outline" size={18} color={currentTheme.textSecondary} />
+                </TouchableOpacity>
+              </View>
+
+              {/* Building, street */}
+              <View style={styles.inputGroup}>
+                <Text style={[styles.label, { color: currentTheme.text }]}>Building, street, and area etc. <Text style={{ color: currentTheme.accent }}>*</Text></Text>
+                <View style={[styles.inputContainer, { backgroundColor: currentTheme.inputBg, borderColor: currentTheme.inputBorder }]}>
+                  <TextInput 
+                    style={[styles.input, { color: currentTheme.text }]}
+                    placeholder="House #15, Street #1, Wapda Town"
+                    value={address}
+                    onChangeText={setAddress}
+                    placeholderTextColor={currentTheme.textSecondary}
+                  />
+                </View>
+              </View>
+
+              {/* Postal / ZIP Code */}
+              <View style={styles.inputGroup}>
+                <Text style={[styles.label, { color: currentTheme.text }]}>Postal Code / ZIP (Optional)</Text>
+                <View style={[styles.inputContainer, { backgroundColor: currentTheme.inputBg, borderColor: currentTheme.inputBorder }]}>
+                  <TextInput 
+                    style={[styles.input, { color: currentTheme.text }]}
+                    placeholder="e.g., 54000"
+                    value={postalCode}
+                    onChangeText={setPostalCode}
+                    keyboardType="number-pad"
+                    placeholderTextColor={currentTheme.textSecondary}
+                  />
+                </View>
+              </View>
+            </>
+          )}
+
+          {/* ================= STEP 2: PAYMENT METHODS ================= */}
+          {checkoutStep === 'payment' && (
+            <View>
+              <Text style={[styles.sectionHeading, { color: currentTheme.text }]}>Choose Payment Option</Text>
+              
+              <TouchableOpacity 
+                style={[
+                  styles.paymentOptionCard, 
+                  { backgroundColor: currentTheme.card, borderColor: paymentMethod === 'COD' ? currentTheme.accent : currentTheme.border }
+                ]}
+                onPress={() => setPaymentMethod('COD')}
+              >
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <MaterialCommunityIcons name="cash-fast" size={24} color={paymentMethod === 'COD' ? currentTheme.accent : currentTheme.textSecondary} />
+                  <View style={{ marginLeft: 12 }}>
+                    <Text style={[styles.paymentTitle, { color: currentTheme.text }]}>Cash on Delivery (COD)</Text>
+                    <Text style={[styles.paymentSubtitle, { color: currentTheme.textSecondary }]}>Pay securely when your order arrives</Text>
+                  </View>
+                </View>
+                <Ionicons 
+                  name={paymentMethod === 'COD' ? "radio-button-on" : "radio-button-off"} 
+                  size={20} 
+                  color={paymentMethod === 'COD' ? currentTheme.accent : currentTheme.textSecondary} 
+                />
+              </TouchableOpacity>
+
+              <TouchableOpacity 
+                style={[
+                  styles.paymentOptionCard, 
+                  { backgroundColor: currentTheme.card, borderColor: paymentMethod === 'CARD' ? currentTheme.accent : currentTheme.border }
+                ]}
+                onPress={() => setPaymentMethod('CARD')}
+              >
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <Ionicons name="card-outline" size={24} color={paymentMethod === 'CARD' ? currentTheme.accent : currentTheme.textSecondary} />
+                  <View style={{ marginLeft: 12 }}>
+                    <Text style={[styles.paymentTitle, { color: currentTheme.text }]}>Credit / Debit Card</Text>
+                    <Text style={[styles.paymentSubtitle, { color: currentTheme.textSecondary }]}>Visa, MasterCard, UnionPay</Text>
+                  </View>
+                </View>
+                <Ionicons 
+                  name={paymentMethod === 'CARD' ? "radio-button-on" : "radio-button-off"} 
+                  size={20} 
+                  color={paymentMethod === 'CARD' ? currentTheme.accent : currentTheme.textSecondary} 
+                />
+              </TouchableOpacity>
+
+              {paymentMethod === 'CARD' && (
+                <View style={[styles.cardFormContainer, { backgroundColor: currentTheme.card, borderColor: currentTheme.border }]}>
+                  <Text style={[styles.label, { color: currentTheme.text }]}>Card Number</Text>
+                  <View style={[styles.inputContainer, { backgroundColor: currentTheme.inputBg, borderColor: currentTheme.inputBorder, marginBottom: 12 }]}>
+                    <TextInput 
+                      style={[styles.input, { color: currentTheme.text }]}
+                      placeholder="4111 2222 3333 4444"
+                      keyboardType="number-pad"
+                      value={cardNumber}
+                      onChangeText={setCardNumber}
+                      placeholderTextColor={currentTheme.textSecondary}
+                    />
+                    <Ionicons name="card" size={18} color={currentTheme.textSecondary} />
+                  </View>
+
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                    <View style={{ flex: 1, marginRight: 8 }}>
+                      <Text style={[styles.label, { color: currentTheme.text }]}>Expiry Date</Text>
+                      <View style={[styles.inputContainer, { backgroundColor: currentTheme.inputBg, borderColor: currentTheme.inputBorder }]}>
+                        <TextInput 
+                          style={[styles.input, { color: currentTheme.text }]}
+                          placeholder="MM/YY"
+                          value={cardExpiry}
+                          onChangeText={setCardExpiry}
+                          placeholderTextColor={currentTheme.textSecondary}
+                        />
+                      </View>
+                    </View>
+                    <View style={{ flex: 1, marginLeft: 8 }}>
+                      <Text style={[styles.label, { color: currentTheme.text }]}>CVV Code</Text>
+                      <View style={[styles.inputContainer, { backgroundColor: currentTheme.inputBg, borderColor: currentTheme.inputBorder }]}>
+                        <TextInput 
+                          style={[styles.input, { color: currentTheme.text }]}
+                          placeholder="123"
+                          secureTextEntry
+                          keyboardType="number-pad"
+                          value={cardCvv}
+                          onChangeText={setCardCvv}
+                          placeholderTextColor={currentTheme.textSecondary}
+                        />
+                      </View>
+                    </View>
+                  </View>
+                </View>
               )}
             </View>
-          </View>
+          )}
 
-          {/* Phone Number */}
-          <View style={styles.inputGroup}>
-            <Text style={[styles.label, { color: theme.text }]}>Phone number <Text style={{ color: '#EA580C' }}>*</Text></Text>
-            <View style={[styles.inputContainer, { paddingHorizontal: 0, backgroundColor: theme.inputBg, borderColor: theme.inputBorder }]}>
-              <View style={styles.phonePrefix}>
-                <Text style={{ fontWeight: '600', color: theme.text, fontSize: 13 }}>PK +92</Text>
-                <View style={[styles.verticalDivider, { backgroundColor: theme.inputBorder }]} />
+          {/* ================= STEP 3: ORDER REVIEW ================= */}
+          {checkoutStep === 'review' && (
+            <View>
+              <Text style={[styles.sectionHeading, { color: currentTheme.text }]}>Review Your Order</Text>
+              
+              <View style={[styles.reviewCard, { backgroundColor: currentTheme.card, borderColor: currentTheme.border }]}>
+                <Text style={[styles.reviewCardTitle, { color: currentTheme.text }]}>Shipping Details</Text>
+                <Text style={[styles.reviewText, { color: currentTheme.textSecondary }]}>Name: <Text style={{ color: currentTheme.text, fontWeight: '600' }}>{fullName}</Text></Text>
+                <Text style={[styles.reviewText, { color: currentTheme.textSecondary }]}>Phone: <Text style={{ color: currentTheme.text, fontWeight: '600' }}>+92 {phoneNumber}</Text></Text>
+                <Text style={[styles.reviewText, { color: currentTheme.textSecondary }]}>Address: <Text style={{ color: currentTheme.text, fontWeight: '600' }}>{address}, {selectedCity}, {selectedProvince}</Text></Text>
               </View>
-              <TextInput 
-                style={[styles.input, { paddingLeft: 8, color: theme.text }]}
-                value={phoneNumber}
-                onChangeText={setPhoneNumber}
-                keyboardType="phone-pad"
-                placeholderTextColor={theme.textSecondary}
-              />
+
+              <View style={[styles.reviewCard, { backgroundColor: currentTheme.card, borderColor: currentTheme.border }]}>
+                <Text style={[styles.reviewCardTitle, { color: currentTheme.text }]}>Payment Information</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 4 }}>
+                  <MaterialCommunityIcons 
+                    name={paymentMethod === 'COD' ? "cash-fast" : "credit-card"} 
+                    size={18} 
+                    color={currentTheme.accent} 
+                  />
+                  <Text style={[styles.reviewText, { color: currentTheme.text, fontWeight: '600', marginLeft: 6, marginBottom: 0 }]}>
+                    {paymentMethod === 'COD' ? 'Cash on Delivery (COD)' : 'Credit / Debit Card'}
+                  </Text>
+                </View>
+              </View>
+
+              <View style={[styles.reviewCard, { backgroundColor: currentTheme.card, borderColor: currentTheme.border }]}>
+                <Text style={[styles.reviewCardTitle, { color: currentTheme.text }]}>Price Details</Text>
+                <View style={styles.priceRow}>
+                  <Text style={{ color: currentTheme.textSecondary, fontSize: 13 }}>Subtotal</Text>
+                  <Text style={{ color: currentTheme.text, fontSize: 13, fontWeight: '600' }}>Rs. 2,499</Text>
+                </View>
+                <View style={styles.priceRow}>
+                  <Text style={{ color: currentTheme.textSecondary, fontSize: 13 }}>Shipping Fee</Text>
+                  <Text style={{ color: currentTheme.success, fontSize: 13, fontWeight: '600' }}>FREE</Text>
+                </View>
+                <View style={[styles.dividerLine, { backgroundColor: currentTheme.border }]} />
+                <View style={styles.priceRow}>
+                  <Text style={{ color: currentTheme.text, fontSize: 14, fontWeight: '700' }}>Total Amount</Text>
+                  <Text style={{ color: currentTheme.accent, fontSize: 15, fontWeight: '700' }}>Rs. 2,499</Text>
+                </View>
+              </View>
             </View>
-          </View>
-
-          {/* Province Field */}
-          <View style={styles.inputGroup}>
-            <Text style={[styles.label, { color: theme.text }]}>Province <Text style={{ color: '#EA580C' }}>*</Text></Text>
-            <TouchableOpacity 
-              style={[styles.dropdownContainer, { backgroundColor: theme.inputBg, borderColor: theme.inputBorder }]} 
-              onPress={() => {
-                setModalType('province');
-                setSearchQuery('');
-                setModalVisible(true);
-              }}
-            >
-              <Text style={{ color: theme.text, fontWeight: '600' }}>{selectedProvince}</Text>
-              <Ionicons name="chevron-down" size={18} color={theme.textSecondary} />
-            </TouchableOpacity>
-          </View>
-
-          {/* City Field */}
-          <View style={styles.inputGroup}>
-            <Text style={[styles.label, { color: theme.text }]}>City <Text style={{ color: '#EA580C' }}>*</Text></Text>
-            <TouchableOpacity 
-              style={[styles.dropdownContainer, { backgroundColor: theme.inputBg, borderColor: theme.inputBorder }]} 
-              onPress={() => {
-                setModalType('city');
-                setSearchQuery('');
-                setModalVisible(true);
-              }}
-            >
-              <Text style={{ color: theme.text, fontWeight: '600' }}>{selectedCity || 'Select City'}</Text>
-              <Ionicons name="search-outline" size={18} color={theme.textSecondary} />
-            </TouchableOpacity>
-          </View>
-
-          {/* Building, street */}
-          <View style={styles.inputGroup}>
-            <Text style={[styles.label, { color: theme.text }]}>Building, street, and area etc. <Text style={{ color: '#EA580C' }}>*</Text></Text>
-            <View style={[styles.inputContainer, { backgroundColor: theme.inputBg, borderColor: theme.inputBorder }]}>
-              <TextInput 
-                style={[styles.input, { color: theme.text }]}
-                placeholder="House #15, Street #1, Wapda Town"
-                value={address}
-                onChangeText={setAddress}
-                placeholderTextColor={theme.textSecondary}
-              />
-            </View>
-          </View>
-
-          {/* Postal / ZIP Code (Optional) */}
-          <View style={styles.inputGroup}>
-            <Text style={[styles.label, { color: theme.text }]}>Postal Code / ZIP (Optional)</Text>
-            <View style={[styles.inputContainer, { backgroundColor: theme.inputBg, borderColor: theme.inputBorder }]}>
-              <TextInput 
-                style={[styles.input, { color: theme.text }]}
-                placeholder="e.g., 54000"
-                value={postalCode}
-                onChangeText={setPostalCode}
-                keyboardType="number-pad"
-                placeholderTextColor={theme.textSecondary}
-              />
-            </View>
-          </View>
+          )}
 
         </ScrollView>
 
-        {/* Bottom Save Button */}
-        <View style={[styles.footer, { backgroundColor: theme.card, borderTopColor: theme.border, paddingBottom: Math.max(insets.bottom, 16) }]}>
-          <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-            <Text style={styles.saveButtonText}>Save & Proceed</Text>
-          </TouchableOpacity>
+        {/* Bottom Action Footer Button */}
+        <View style={[styles.footer, { backgroundColor: currentTheme.card, borderTopColor: currentTheme.border, paddingBottom: Math.max(insets.bottom, 16) }]}>
+          {checkoutStep === 'address' && (
+            <TouchableOpacity style={[styles.saveButton, { backgroundColor: currentTheme.accent, shadowColor: currentTheme.accent }]} onPress={handleProceedFromAddress}>
+              <Text style={styles.saveButtonText}>Proceed to Payment</Text>
+            </TouchableOpacity>
+          )}
+
+          {checkoutStep === 'payment' && (
+            <TouchableOpacity style={[styles.saveButton, { backgroundColor: currentTheme.accent, shadowColor: currentTheme.accent }]} onPress={handleProceedFromPayment}>
+              <Text style={styles.saveButtonText}>Review Order</Text>
+            </TouchableOpacity>
+          )}
+
+          {checkoutStep === 'review' && (
+            <TouchableOpacity style={[styles.saveButton, { backgroundColor: currentTheme.accent, shadowColor: currentTheme.accent }]} onPress={handlePlaceOrder}>
+              <Text style={styles.saveButtonText}>Place Order Now</Text>
+            </TouchableOpacity>
+          )}
         </View>
       </KeyboardAvoidingView>
 
-      {/* --- SELECTOR MODAL (Province / All Pakistan Cities Selection) --- */}
+      {/* --- SELECTOR MODAL --- */}
       <Modal visible={modalVisible} transparent animationType="slide">
         <View style={styles.selectorModalOverlay}>
-          <View style={[styles.selectorModalContent, { backgroundColor: theme.card }]}>
+          <View style={[styles.selectorModalContent, { backgroundColor: currentTheme.card }]}>
             
             <View style={styles.selectorHeader}>
-              <Text style={[styles.selectorTitle, { color: theme.text }]}>
+              <Text style={[styles.selectorTitle, { color: currentTheme.text }]}>
                 {modalType === 'province' ? 'Select Province' : 'Select City in Pakistan'}
               </Text>
               <TouchableOpacity onPress={() => setModalVisible(false)}>
-                <Ionicons name="close" size={22} color={theme.text} />
+                <Ionicons name="close" size={22} color={currentTheme.text} />
               </TouchableOpacity>
             </View>
 
-            {/* Search Box inside Modal */}
-            <View style={[styles.searchBox, { backgroundColor: '#252525' }]}>
-              <Ionicons name="search" size={16} color={theme.textSecondary} style={{ marginRight: 8 }} />
+            <View style={[styles.searchBox, { backgroundColor: currentTheme.cardElevated }]}>
+              <Ionicons name="search" size={16} color={currentTheme.textSecondary} style={{ marginRight: 8 }} />
               <TextInput 
-                style={{ flex: 1, fontSize: 13, color: theme.text }}
+                style={{ flex: 1, fontSize: 13, color: currentTheme.text }}
                 placeholder={modalType === 'province' ? "Search province..." : "Search any city in Pakistan..."}
                 value={searchQuery}
                 onChangeText={setSearchQuery}
-                placeholderTextColor={theme.textSecondary}
+                placeholderTextColor={currentTheme.textSecondary}
               />
               {searchQuery.length > 0 && (
                 <TouchableOpacity onPress={() => setSearchQuery('')}>
-                  <Ionicons name="close-circle" size={16} color={theme.textSecondary} />
+                  <Ionicons name="close-circle" size={16} color={currentTheme.textSecondary} />
                 </TouchableOpacity>
               )}
             </View>
@@ -305,7 +526,7 @@ export default function CheckoutAddressScreen({ navigation }) {
               keyExtractor={(item, index) => index.toString()}
               renderItem={({ item }) => (
                 <TouchableOpacity 
-                  style={[styles.listItem, { borderBottomColor: theme.border }]}
+                  style={[styles.listItem, { borderBottomColor: currentTheme.border }]}
                   onPress={() => {
                     if (modalType === 'province') {
                       setSelectedProvince(item);
@@ -317,22 +538,22 @@ export default function CheckoutAddressScreen({ navigation }) {
                 >
                   <Text style={[
                     styles.listItemText, 
-                    { color: theme.textSecondary },
+                    { color: currentTheme.textSecondary },
                     ((modalType === 'province' && selectedProvince === item) || 
-                     (modalType === 'city' && selectedCity === item)) && { color: '#EA580C', fontWeight: '700' }
+                     (modalType === 'city' && selectedCity === item)) && { color: currentTheme.accent, fontWeight: '700' }
                   ]}>
                     {item}
                   </Text>
                   {((modalType === 'province' && selectedProvince === item) || 
                     (modalType === 'city' && selectedCity === item)) && (
-                    <Ionicons name="checkmark" size={18} color="#EA580C" />
+                    <Ionicons name="checkmark" size={18} color={currentTheme.accent} />
                   )}
                 </TouchableOpacity>
               )}
               showsVerticalScrollIndicator={false}
               contentContainerStyle={{ paddingVertical: 8 }}
               ListEmptyComponent={
-                <Text style={{ textAlign: 'center', color: theme.textSecondary, marginTop: 20, fontSize: 13 }}>
+                <Text style={{ textAlign: 'center', color: currentTheme.textSecondary, marginTop: 20, fontSize: 13 }}>
                   No results found
                 </Text>
               }
@@ -342,93 +563,92 @@ export default function CheckoutAddressScreen({ navigation }) {
         </View>
       </Modal>
 
-      {/* --- MODAL 1: Address Warning Modal --- */}
+      {/* --- WARNING MODAL --- */}
       <Modal visible={showWarningModal} transparent animationType="fade">
         <View style={styles.modalOverlay}>
-          <View style={[styles.warningModalContent, { backgroundColor: theme.card }]}>
+          <View style={[styles.warningModalContent, { backgroundColor: currentTheme.card }]}>
             <View style={styles.warningIconBg}>
               <Ionicons name="alert" size={24} color="#D97706" />
             </View>
             
-            <Text style={[styles.warningTitle, { color: theme.text }]}>
+            <Text style={[styles.warningTitle, { color: currentTheme.text }]}>
               Courier may be unable to deliver if building or house number is missing. Please verify your address.
             </Text>
 
-            <Text style={[styles.shippingAddressLabel, { color: theme.textSecondary }]}>Shipping address preview:</Text>
-            <View style={[styles.addressPreviewBox, { backgroundColor: '#252525', borderColor: theme.border }]}>
-              <Text style={[styles.addressPreviewText, { color: theme.text }]}>
+            <Text style={[styles.shippingAddressLabel, { color: currentTheme.textSecondary }]}>Shipping address preview:</Text>
+            <View style={[styles.addressPreviewBox, { backgroundColor: currentTheme.cardElevated, borderColor: currentTheme.border }]}>
+              <Text style={[styles.addressPreviewText, { color: currentTheme.text }]}>
                 {address ? address : 'House #12'}, {selectedCity}, {selectedProvince} {postalCode ? `- ${postalCode}` : ''}
               </Text>
             </View>
 
             <TouchableOpacity 
-              style={styles.editMyAddressBtn} 
+              style={[styles.editMyAddressBtn, { backgroundColor: currentTheme.accent }]} 
               onPress={() => setShowWarningModal(false)}
             >
               <Text style={styles.editMyAddressText}>Edit my address</Text>
             </TouchableOpacity>
 
             <TouchableOpacity 
-              style={[styles.isCorrectBtn, { backgroundColor: theme.card, borderColor: theme.inputBorder }]} 
+              style={[styles.isCorrectBtn, { backgroundColor: currentTheme.card, borderColor: currentTheme.inputBorder }]} 
               onPress={handleItIsCorrect}
             >
-              <Text style={[styles.isCorrectText, { color: theme.text }]}>It is correct</Text>
+              <Text style={[styles.isCorrectText, { color: currentTheme.text }]}>It is correct</Text>
             </TouchableOpacity>
 
           </View>
         </View>
       </Modal>
 
-      {/* --- MODAL 2: Delivery Alerts & Step Animation Modal --- */}
+      {/* --- ALERTS & STEP ANIMATION MODAL --- */}
       <Modal visible={showAlertsModal} transparent animationType="slide">
         <View style={styles.modalOverlay}>
-          <View style={[styles.alertsModalContent, { backgroundColor: theme.card }]}>
+          <View style={[styles.alertsModalContent, { backgroundColor: currentTheme.card }]}>
             
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-              <Text style={[styles.alertsTitle, { color: theme.text }]}>Delivery alerts</Text>
+              <Text style={[styles.alertsTitle, { color: currentTheme.text }]}>Order Placed Successfully!</Text>
               <TouchableOpacity onPress={() => setShowAlertsModal(false)}>
-                <Ionicons name="close" size={20} color={theme.text} />
+                <Ionicons name="close" size={20} color={currentTheme.text} />
               </TouchableOpacity>
             </View>
             
-            <Text style={[styles.alertsSubTitle, { color: theme.textSecondary }]}>Turn on notifications to track real-time parcel movement.</Text>
+            <Text style={[styles.alertsSubTitle, { color: currentTheme.textSecondary }]}>Turn on notifications to track real-time parcel movement.</Text>
 
-            {/* Stepper Graphic Progress */}
             <View style={styles.stepperContainer}>
               <View style={styles.stepItem}>
-                <View style={[styles.stepCircle, { backgroundColor: '#2D2D2D' }, step1Green && styles.greenCircle]}>
+                <View style={[styles.stepCircle, { backgroundColor: currentTheme.border }, step1Green && { backgroundColor: currentTheme.success }]}>
                   <Ionicons name="checkmark" size={16} color="#FFFFFF" />
                 </View>
-                <Text style={[styles.stepText, { color: theme.textSecondary }]}>Processing</Text>
+                <Text style={[styles.stepText, { color: currentTheme.textSecondary }]}>Processing</Text>
               </View>
 
-              <View style={[styles.stepLine, { backgroundColor: '#2D2D2D' }, line1Green && styles.greenLine]} />
+              <View style={[styles.stepLine, { backgroundColor: currentTheme.border }, line1Green && { backgroundColor: currentTheme.success }]} />
 
               <View style={styles.stepItem}>
-                <View style={[styles.stepCircle, { backgroundColor: '#2D2D2D' }, step2Green && styles.greenCircle]}>
-                  <MaterialCommunityIcons name="truck-delivery" size={15} color={step2Green ? "#FFF" : theme.textSecondary} />
+                <View style={[styles.stepCircle, { backgroundColor: currentTheme.border }, step2Green && { backgroundColor: currentTheme.success }]}>
+                  <MaterialCommunityIcons name="truck-delivery" size={15} color={step2Green ? "#FFF" : currentTheme.textSecondary} />
                 </View>
-                <Text style={[styles.stepText, { color: theme.textSecondary }]}>Shipped</Text>
+                <Text style={[styles.stepText, { color: currentTheme.textSecondary }]}>Shipped</Text>
               </View>
 
-              <View style={[styles.stepLine, { backgroundColor: '#2D2D2D' }, line2Green && styles.greenLine]} />
+              <View style={[styles.stepLine, { backgroundColor: currentTheme.border }, line2Green && { backgroundColor: currentTheme.success }]} />
 
               <View style={styles.stepItem}>
-                <View style={[styles.stepCircle, { backgroundColor: '#2D2D2D' }, step3Green && styles.greenCircle]}>
-                  <MaterialCommunityIcons name="package-variant-closed" size={15} color={step3Green ? "#FFF" : theme.textSecondary} />
+                <View style={[styles.stepCircle, { backgroundColor: currentTheme.border }, step3Green && { backgroundColor: currentTheme.success }]}>
+                  <MaterialCommunityIcons name="package-variant-closed" size={15} color={step3Green ? "#FFF" : currentTheme.textSecondary} />
                 </View>
-                <Text style={[styles.stepText, { color: theme.textSecondary }]}>Delivered</Text>
+                <Text style={[styles.stepText, { color: currentTheme.textSecondary }]}>Delivered</Text>
               </View>
             </View>
 
             <TouchableOpacity 
-              style={[styles.okButton, step3Green && { backgroundColor: '#16A34A' }]} 
+              style={[styles.okButton, { backgroundColor: currentTheme.accent }, step3Green && { backgroundColor: currentTheme.success }]} 
               onPress={() => {
                 setShowAlertsModal(false);
                 navigation.goBack();
               }}
             >
-              <Text style={styles.okButtonText}>Continue</Text>
+              <Text style={styles.okButtonText}>Done</Text>
             </TouchableOpacity>
 
           </View>
@@ -457,6 +677,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   headerTitle: { fontSize: 15, fontWeight: '700' },
+  
+  stepBarContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 10,
+    paddingHorizontal: 40,
+    borderBottomWidth: 1,
+  },
+  stepIndicatorItem: { alignItems: 'center' },
+  miniDot: { width: 8, height: 8, borderRadius: 4, marginBottom: 3 },
+  miniDotText: { fontSize: 10, fontWeight: '600' },
+  miniLine: { flex: 1, height: 2, marginHorizontal: 10, marginBottom: 15 },
+
   secureContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
@@ -464,7 +698,7 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     borderBottomWidth: 1,
   },
-  secureText: { color: '#16A34A', fontWeight: '600', fontSize: 11 },
+  secureText: { fontWeight: '600', fontSize: 11 },
   promoBanner: {
     flexDirection: 'row',
     justifyContent: 'space-around',
@@ -481,14 +715,10 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     marginBottom: 14,
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.02,
-    shadowRadius: 2,
-    elevation: 1,
   },
   countryLabel: { fontSize: 13, fontWeight: '500' },
   inputGroup: { marginBottom: 14 },
+  sectionHeading: { fontSize: 15, fontWeight: '700', marginBottom: 12 },
   label: { fontSize: 12, fontWeight: '600', marginBottom: 6 },
   inputContainer: {
     flexDirection: 'row',
@@ -497,11 +727,6 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     paddingHorizontal: 12,
     height: 48,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.02,
-    shadowRadius: 2,
-    elevation: 1,
   },
   input: { flex: 1, fontSize: 13 },
   phonePrefix: { flexDirection: 'row', alignItems: 'center', paddingLeft: 8, paddingRight: 4 },
@@ -514,20 +739,44 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     paddingHorizontal: 12,
     height: 48,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.02,
-    shadowRadius: 2,
-    elevation: 1,
   },
+  
+  paymentOptionCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 14,
+    borderRadius: 12,
+    borderWidth: 1.5,
+    marginBottom: 12,
+  },
+  paymentTitle: { fontSize: 13, fontWeight: '700' },
+  paymentSubtitle: { fontSize: 11, marginTop: 2 },
+  cardFormContainer: {
+    padding: 14,
+    borderRadius: 12,
+    borderWidth: 1,
+    marginTop: 6,
+    marginBottom: 14,
+  },
+
+  reviewCard: {
+    padding: 14,
+    borderRadius: 12,
+    borderWidth: 1,
+    marginBottom: 12,
+  },
+  reviewCardTitle: { fontSize: 13, fontWeight: '700', marginBottom: 8 },
+  reviewText: { fontSize: 12, marginBottom: 4 },
+  priceRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 },
+  dividerLine: { height: 1, marginVertical: 6 },
+
   footer: { padding: 16, borderTopWidth: 1 },
   saveButton: {
-    backgroundColor: '#EA580C',
     height: 48,
     borderRadius: 24,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#EA580C',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.25,
     shadowRadius: 6,
@@ -535,7 +784,6 @@ const styles = StyleSheet.create({
   },
   saveButtonText: { color: '#FFFFFF', fontSize: 15, fontWeight: '700' },
   
-  // Selector Modal Styles
   selectorModalOverlay: { flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.7)', justifyContent: 'flex-end' },
   selectorModalContent: {
     borderTopLeftRadius: 20,
@@ -564,7 +812,6 @@ const styles = StyleSheet.create({
   },
   listItemText: { fontSize: 13 },
 
-  // Warning Modal Styles
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.7)', justifyContent: 'center', alignItems: 'center', padding: 20 },
   warningModalContent: { borderRadius: 16, padding: 20, width: '100%', maxWidth: 330, alignItems: 'center' },
   warningIconBg: { width: 44, height: 44, borderRadius: 22, backgroundColor: '#FEF3C7', justifyContent: 'center', alignItems: 'center', marginBottom: 12 },
@@ -572,22 +819,19 @@ const styles = StyleSheet.create({
   shippingAddressLabel: { alignSelf: 'flex-start', fontSize: 12, marginBottom: 4 },
   addressPreviewBox: { borderRadius: 8, padding: 10, width: '100%', marginBottom: 16, borderWidth: 1 },
   addressPreviewText: { fontSize: 12, fontWeight: '600' },
-  editMyAddressBtn: { backgroundColor: '#EA580C', width: '100%', height: 42, borderRadius: 21, justifyContent: 'center', alignItems: 'center', marginBottom: 8 },
+  editMyAddressBtn: { width: '100%', height: 42, borderRadius: 21, justifyContent: 'center', alignItems: 'center', marginBottom: 8 },
   editMyAddressText: { color: '#FFFFFF', fontWeight: '700', fontSize: 13 },
   isCorrectBtn: { borderWidth: 1, width: '100%', height: 42, borderRadius: 21, justifyContent: 'center', alignItems: 'center' },
   isCorrectText: { fontWeight: '700', fontSize: 13 },
 
-  // Alerts Modal Styles
   alertsModalContent: { borderRadius: 16, padding: 18, width: '100%', maxWidth: 330 },
   alertsTitle: { fontSize: 16, fontWeight: '700' },
   alertsSubTitle: { fontSize: 12, marginBottom: 20 },
   stepperContainer: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginBottom: 24 },
   stepItem: { alignItems: 'center' },
   stepCircle: { width: 34, height: 34, borderRadius: 17, justifyContent: 'center', alignItems: 'center', marginBottom: 4 },
-  greenCircle: { backgroundColor: '#16A34A' },
   stepText: { fontSize: 11, fontWeight: '600' },
   stepLine: { flex: 1, height: 2, marginHorizontal: -10, marginTop: -14 },
-  greenLine: { backgroundColor: '#16A34A' },
-  okButton: { backgroundColor: '#EA580C', height: 44, borderRadius: 22, justifyContent: 'center', alignItems: 'center' },
+  okButton: { height: 44, borderRadius: 22, justifyContent: 'center', alignItems: 'center' },
   okButtonText: { color: '#FFFFFF', fontWeight: '700', fontSize: 14 },
 });
