@@ -12,10 +12,16 @@ import BottomTabNavigator from './BottomTabNavigator';
 import CategoryProductsScreen from '../screens/CategoryProductsScreen';
 import ProductDetailScreen from '../screens/ProductDetailScreen';
 import CartScreen from '../screens/CartScreen';
+import OrdersScreen from '../screens/OrdersScreen';
+import OrderDetailScreen from '../screens/OrderDetailScreen';
 import CheckoutAddressScreen from '../screens/CheckoutAddressScreen';
-import WhyChooseScreen from '../screens/WhyChooseScreen'; // ya jo bhi aapne file ka naam rakha ho
+import WhyChooseScreen from '../screens/WhyChooseScreen';
+import ServicesScreen from '../screens/ServicesScreen';
+import SettingsScreen from '../screens/SettingsScreen';
+
 
 const Stack = createNativeStackNavigator();
+
 
 export default function AppNavigator() {
   return (
@@ -31,19 +37,15 @@ export default function AppNavigator() {
         <Stack.Screen name="OtpVerification" component={OtpVerificationScreen} />
         <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
         <Stack.Screen name="MainApp" component={BottomTabNavigator} />
-       <Stack.Screen name="CategoryProducts" component={CategoryProductsScreen} />
-       <Stack.Screen name="ItemDetail" component={ProductDetailScreen} options={{ headerShown: false }} />
-       <Stack.Screen name="Cart" component={CartScreen} />
-       <Stack.Screen 
-  name="CheckoutAddress" 
-  component={CheckoutAddressScreen} 
-  options={{ headerShown: false }} 
-/>
-<Stack.Screen 
-  name="WhyChoose" 
-  component={WhyChooseScreen} 
-  options={{ headerShown: false }} // Kyunki humne code mein khud custom header banaya hai
-/>
+        <Stack.Screen name="CategoryProducts" component={CategoryProductsScreen} />
+        <Stack.Screen name="ItemDetail" component={ProductDetailScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="Cart" component={CartScreen} />
+        <Stack.Screen name="Orders" component={OrdersScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="OrderDetail" component={OrderDetailScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="CheckoutAddress" component={CheckoutAddressScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="WhyChoose" component={WhyChooseScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="Services" component={ServicesScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="Settings" component={SettingsScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

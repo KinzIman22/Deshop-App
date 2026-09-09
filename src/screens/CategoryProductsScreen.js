@@ -39,7 +39,6 @@ export default function CategoryProductsScreen({ route, navigation }) {
   const insets = useSafeAreaInsets();
   const closeModal = () => setActiveModal(null);
 
-  // Filter and Sort Logic for SDK 57 compatibility
   const filteredProducts = CATEGORY_PRODUCTS.filter((item) => {
     const matchesSearch = searchQuery 
       ? item.title.toLowerCase().includes(searchQuery.toLowerCase())
@@ -188,11 +187,10 @@ export default function CategoryProductsScreen({ route, navigation }) {
           <TouchableOpacity 
             style={styles.productCard}
             onPress={() => {
-              try {
-                navigation.navigate('ItemDetail', { product: item });
-              } catch (e) {
-                navigation.getParent()?.navigate('ItemDetail', { product: item });
-              }
+              navigation.navigate('ItemDetail', { 
+                productId: item.id, 
+                product: item 
+              });
             }}
           >
             <View style={styles.productImageContainer}>

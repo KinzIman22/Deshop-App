@@ -1,3 +1,4 @@
+// src/screens/ProfileScreen.js
 import React, { useState, useEffect, useContext } from 'react';
 import { 
   View, 
@@ -7,7 +8,8 @@ import {
   ScrollView,
   Image,
   Alert,
-  ActivityIndicator 
+  ActivityIndicator,
+  FlatList
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -15,7 +17,7 @@ import { useNavigation } from '@react-navigation/native';
 import * as ImagePicker from 'expo-image-picker';
 import { LinearGradient } from 'expo-linear-gradient';
 
-// Import CartContext (Path adjust kar lijiyega agar folder structure alag ho)
+// Import CartContext
 import { CartContext } from '../context/CartContext';
 
 // Import data handler
@@ -25,8 +27,8 @@ export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
 
-  // Access addToCart function from CartContext
-  const { addToCart } = useContext(CartContext);
+  // Access cart items from CartContext
+  const { cart, addToCart } = useContext(CartContext);
 
   // State for profile image URI
   const [profileImage, setProfileImage] = useState(null);
@@ -34,6 +36,9 @@ export default function ProfileScreen() {
   // States for Hot Sale Products
   const [hotSales, setHotSales] = useState([]);
   const [loadingHotSales, setLoadingHotSales] = useState(true);
+
+  // Delivered orders mock count state
+  const [deliveredCount, setDeliveredCount] = useState(12);
 
   useEffect(() => {
     loadHotSalesData();
@@ -49,6 +54,16 @@ export default function ProfileScreen() {
       Alert.alert("Error", "Failed to load hot sale products.");
     } finally {
       setLoadingHotSales(false);
+    }
+  };
+
+  // Safe navigation helper
+  const navigateToRoot = (screenName, params = {}) => {
+    const parentNav = navigation.getParent();
+    if (parentNav) {
+      parentNav.navigate(screenName, params);
+    } else {
+      navigation.navigate(screenName, params);
     }
   };
 
@@ -101,25 +116,51 @@ export default function ProfileScreen() {
 
   // Handle adding product directly to global CartContext
   const handleAddToCart = (product) => {
-    // Passing product, default color, and quantity as 1 based on your CartContext logic
     addToCart(product, 'Default', 1);
     Alert.alert("Success", `${product.title} has been added to your cart!`);
   };
 
+  // Order statuses with badges
   const orderStatuses = [
-    { id: '1', title: 'Pending', icon: 'time-outline' },
-    { id: '2', title: 'Processing', icon: 'cube-outline' },
-    { id: '3', title: 'Shipped', icon: 'car-outline' },
-    { id: '4', title: 'Review', icon: 'chatbubble-outline' },
-    { id: '5', title: 'Preorder', icon: 'hourglass-outline' },
+    { id: '1', title: 'Pending', icon: 'time-outline', badge: '2' },
+    { id: '2', title: 'Processing', icon: 'cube-outline', badge: '1' },
+    { id: '3', title: 'Shipped', icon: 'car-outline', badge: '3' },
+    { id: '4', title: 'Review', icon: 'refresh-outline', badge: '0' },
+    { id: '5', title: 'Preorder', icon: 'hourglass-outline', badge: '1' },
   ];
 
+  // Updated Services Section Items pointing to 'Services' screen with serviceType param
   const services = [
-    { id: '1', title: 'Browsing History', icon: 'folder-outline' },
-    { id: '2', title: 'Address', icon: 'location-outline' },
-    { id: '3', title: 'Support', icon: 'headset-outline' },
-    { id: '4', title: 'About Us', icon: 'alert-circle-outline' },
+    { id: '1', title: 'Browsing History', icon: 'calendar-outline', serviceType: 'BrowsingHistory' },
+    { id: '2', title: 'Address', icon: 'location-outline', serviceType: 'Address' },
+    { id: '3', title: 'Support', icon: 'headset-outline', serviceType: 'Support' },
+    { id: '4', title: 'About Us', icon: 'information-circle-outline', serviceType: 'AboutUs' },
   ];
+
+  // Render function for individual product card inside FlatList
+  const renderProductItem = ({ item }) => (
+    <TouchableOpacity 
+      style={styles.productCard}
+      onPress={() => navigateToRoot('CategoryProducts', { productId: item.id })}
+    >
+      <Image source={{ uri: item.image }} style={styles.productImage} />
+      <Text style={styles.productTitle} numberOfLines={2}>{item.title}</Text>
+      
+      <View style={styles.productFooter}>
+        <Text style={styles.productPrice}>{item.price}</Text>
+        
+        <TouchableOpacity 
+          style={styles.cartButton}
+          onPress={(e) => {
+            e.stopPropagation();
+            handleAddToCart(item);
+          }}
+        >
+          <Ionicons name="cart-outline" size={18} color="#FFFFFF" />
+        </TouchableOpacity>
+      </View>
+    </TouchableOpacity>
+  );
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
@@ -132,11 +173,11 @@ export default function ProfileScreen() {
         >
           <View style={styles.topBarRow}>
             <TouchableOpacity 
-              style={styles.settingsBtn}
-              onPress={() => Alert.alert("Settings", "Navigate to Settings Screen")}
-            >
-              <Ionicons name="settings-outline" size={24} color="#FFFFFF" />
-            </TouchableOpacity>
+  style={styles.settingsBtn}
+  onPress={() => navigateToRoot('Settings')}
+>
+  <Ionicons name="settings-outline" size={24} color="#FFFFFF" />
+</TouchableOpacity>
           </View>
 
           <View style={styles.userTopRow}>
@@ -163,20 +204,24 @@ export default function ProfileScreen() {
             </View>
           </View>
 
+          {/* Cart Items & Delivered Orders Count */}
           <View style={styles.statsBar}>
-            <TouchableOpacity style={styles.statItem} onPress={() => Alert.alert("Wishlist", "Navigate to Wishlist")}>
-              <Text style={styles.statNumber}>5</Text>
-              <Text style={styles.statLabel}>Wishlist</Text>
+            <TouchableOpacity 
+              style={styles.statItem} 
+              onPress={() => navigation.navigate('CartTab')}
+            >
+              <Text style={styles.statNumber}>{cart ? cart.length : 0}</Text>
+              <Text style={styles.statLabel}>Cart Items</Text>
             </TouchableOpacity>
+            
             <View style={styles.statDivider} />
-            <TouchableOpacity style={styles.statItem} onPress={() => Alert.alert("Coupons", "Navigate to Coupons")}>
-              <Text style={styles.statNumber}>10</Text>
-              <Text style={styles.statLabel}>Coupons</Text>
-            </TouchableOpacity>
-            <View style={styles.statDivider} />
-            <TouchableOpacity style={styles.statItem} onPress={() => Alert.alert("Points", "Navigate to Points")}>
-              <Text style={styles.statNumber}>55</Text>
-              <Text style={styles.statLabel}>Points</Text>
+            
+            <TouchableOpacity 
+              style={styles.statItem} 
+              onPress={() => Alert.alert("Delivered Orders", `You have successfully received ${deliveredCount} orders.`)}
+            >
+              <Text style={styles.statNumber}>{deliveredCount}</Text>
+              <Text style={styles.statLabel}>Delivered</Text>
             </TouchableOpacity>
           </View>
         </LinearGradient>
@@ -185,8 +230,8 @@ export default function ProfileScreen() {
         <View style={styles.sectionContainer}>
           <View style={styles.sectionHeaderRow}>
             <Text style={styles.sectionTitle}>My Orders</Text>
-            <TouchableOpacity onPress={() => navigation.navigate('Orders')}>
-              <Text style={styles.viewAllText}>View All</Text>
+            <TouchableOpacity onPress={() => navigateToRoot('Orders', { status: 'Pending' })}>
+              <Text style={styles.viewAllText}>View All ></Text>
             </TouchableOpacity>
           </View>
 
@@ -195,10 +240,15 @@ export default function ProfileScreen() {
               <TouchableOpacity 
                 key={item.id} 
                 style={styles.statusItem}
-                onPress={() => navigation.navigate('Orders')}
+                onPress={() => navigateToRoot('Orders', { status: item.title })}
               >
                 <View style={styles.iconBox}>
                   <Ionicons name={item.icon} size={22} color="#EF4444" />
+                  {item.badge !== undefined && (
+                    <View style={styles.badgeContainer}>
+                      <Text style={styles.badgeText}>{item.badge}</Text>
+                    </View>
+                  )}
                 </View>
                 <Text style={styles.statusText} numberOfLines={1}>{item.title}</Text>
               </TouchableOpacity>
@@ -206,7 +256,7 @@ export default function ProfileScreen() {
           </View>
         </View>
 
-        {/* Services Section */}
+        {/* Services Section with Navigation */}
         <View style={styles.sectionContainer}>
           <Text style={styles.sectionTitle}>Services</Text>
 
@@ -215,7 +265,7 @@ export default function ProfileScreen() {
               <TouchableOpacity 
                 key={item.id} 
                 style={styles.serviceItem}
-                onPress={() => Alert.alert(item.title, `Opening ${item.title}...`)}
+                onPress={() => navigateToRoot('Services', { serviceType: item.serviceType })}
               >
                 <View style={styles.iconBox}>
                   <Ionicons name={item.icon} size={22} color="#EF4444" />
@@ -226,9 +276,14 @@ export default function ProfileScreen() {
           </View>
         </View>
 
-        {/* Dynamic Hot Sale Section */}
+        {/* Dynamic Hot Sale Section with 2-Column FlatList */}
         <View style={styles.sectionContainer}>
-          <Text style={[styles.sectionTitle, { textAlign: 'center', marginBottom: 14 }]}>Hot Sale (Top Selling)</Text>
+          <View style={styles.sectionHeaderRow}>
+            <Text style={styles.sectionTitle}>Hot Sale (Top Selling)</Text>
+            <TouchableOpacity onPress={() => navigateToRoot('CategoryProducts')}>
+              <Text style={styles.viewAllText}>View All ></Text>
+            </TouchableOpacity>
+          </View>
 
           {loadingHotSales ? (
             <View style={styles.loaderContainer}>
@@ -236,33 +291,15 @@ export default function ProfileScreen() {
               <Text style={styles.loaderText}>Loading top sales...</Text>
             </View>
           ) : hotSales.length > 0 ? (
-            <View style={styles.hotSaleRow}>
-              {hotSales.map((item) => (
-                <TouchableOpacity 
-                  key={item.id} 
-                  style={styles.productCard}
-                  onPress={() => navigation.navigate('CategoryProducts', { productId: item.id })}
-                >
-                  <Image source={{ uri: item.image }} style={styles.productImage} />
-                  <Text style={styles.productTitle} numberOfLines={2}>{item.title}</Text>
-                  
-                  <View style={styles.productFooter}>
-                    <Text style={styles.productPrice}>{item.price}</Text>
-                    
-                    {/* Cart Button connected to CartContext */}
-                    <TouchableOpacity 
-                      style={styles.cartButton}
-                      onPress={(e) => {
-                        e.stopPropagation(); // Prevents card press event from firing
-                        handleAddToCart(item);
-                      }}
-                    >
-                      <Ionicons name="cart-outline" size={18} color="#FFFFFF" />
-                    </TouchableOpacity>
-                  </View>
-                </TouchableOpacity>
-              ))}
-            </View>
+            <FlatList
+              data={hotSales}
+              renderItem={renderProductItem}
+              keyExtractor={(item) => item.id.toString()}
+              numColumns={2}
+              columnWrapperStyle={styles.columnWrapper}
+              scrollEnabled={false}
+              showsVerticalScrollIndicator={false}
+            />
           ) : (
             <Text style={styles.noDataText}>No products available right now.</Text>
           )}
@@ -426,13 +463,33 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   iconBox: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     backgroundColor: '#FEF2F2',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 6,
+    position: 'relative',
+  },
+  badgeContainer: {
+    position: 'absolute',
+    top: -4,
+    right: -4,
+    backgroundColor: '#EF4444',
+    minWidth: 18,
+    height: 18,
+    borderRadius: 9,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1.5,
+    borderColor: '#FFFFFF',
+    paddingHorizontal: 3,
+  },
+  badgeText: {
+    color: '#FFFFFF',
+    fontSize: 10,
+    fontWeight: '700',
   },
   statusText: {
     fontSize: 10,
@@ -444,9 +501,9 @@ const styles = StyleSheet.create({
     color: '#4B5563',
     textAlign: 'center',
   },
-  hotSaleRow: {
-    flexDirection: 'row',
+  columnWrapper: {
     justifyContent: 'space-between',
+    marginBottom: 10,
   },
   productCard: {
     width: '48%',
@@ -486,7 +543,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   loaderContainer: {
-    paddingVertical: 20,
+    paddingVertical: 15,
     alignItems: 'center',
     justifyContent: 'center',
   },
