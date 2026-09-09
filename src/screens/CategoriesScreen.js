@@ -14,15 +14,16 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { LEFT_CATEGORIES, SUB_CATEGORIES_DATA } from '../data/categoriesData';
 import AvailableOffersModal from '../components/AvailableOffersModal';
+import { useTheme } from '../context/ThemeContext';
 
 const { width } = Dimensions.get('window');
-const RIGHT_CONTENT_WIDTH = width - 115; // Total width minus left sidebar width
 
 export default function CategoriesScreen({ navigation }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeLeftCat, setActiveLeftCat] = useState('1');
   const [modalVisible, setModalVisible] = useState(false);
   const insets = useSafeAreaInsets();
+  const { colors, isDarkMode } = useTheme();
 
   // Combine "View All" card with current subcategories list
   const rawSubCategories = SUB_CATEGORIES_DATA[activeLeftCat] || SUB_CATEGORIES_DATA['1'];
@@ -32,47 +33,47 @@ export default function CategoriesScreen({ navigation }) {
   ];
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
+    <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom, backgroundColor: colors.background }]}>
       {/* Top Search Header */}
-      <View style={styles.searchHeader}>
-        <View style={styles.searchBar}>
+      <View style={[styles.searchHeader, { backgroundColor: colors.headerBg || colors.cardBg, borderBottomColor: colors.borderColor }]}>
+        <View style={[styles.searchBar, { backgroundColor: colors.inputBg, borderColor: colors.borderColor }]}>
           <TextInput 
-            style={styles.searchInput}
+            style={[styles.searchInput, { color: colors.textPrimary }]}
             value={searchQuery}
             onChangeText={setSearchQuery}
             placeholder="baby toothbrush"
-            placeholderTextColor="#9CA3AF"
+            placeholderTextColor={colors.textSecondary}
           />
           <TouchableOpacity style={styles.cameraIconBtn}>
-            <Ionicons name="camera-outline" size={20} color="#4B5563" />
+            <Ionicons name="camera-outline" size={20} color={colors.textSecondary} />
           </TouchableOpacity>
         </View>
-        <TouchableOpacity style={styles.searchIconButton}>
-          <Ionicons name="search" size={20} color="#FFFFFF" />
+        <TouchableOpacity style={[styles.searchIconButton, { backgroundColor: isDarkMode ? '#FFFFFF' : '#000000' }]}>
+          <Ionicons name="search" size={20} color={isDarkMode ? '#000000' : '#FFFFFF'} />
         </TouchableOpacity>
       </View>
 
       {/* Promotional Banner Info Bar */}
       <TouchableOpacity 
-        style={styles.infoBar}
+        style={[styles.infoBar, { backgroundColor: isDarkMode ? '#1E293B' : '#FFFBEB', borderBottomColor: isDarkMode ? '#334155' : '#FEF3C7' }]}
         onPress={() => setModalVisible(true)}
       >
         <View style={styles.infoItem}>
           <Ionicons name="checkmark" size={14} color="#16A34A" />
-          <Text style={styles.infoText}> Free shipping</Text>
+          <Text style={[styles.infoText, { color: isDarkMode ? '#4ADE80' : '#166534' }]}> Free shipping</Text>
         </View>
         <View style={styles.infoItem}>
           <Ionicons name="checkmark" size={14} color="#16A34A" />
-          <Text style={styles.infoText}> Price adjustment within 30 days</Text>
+          <Text style={[styles.infoText, { color: isDarkMode ? '#4ADE80' : '#166534' }]}> Price adjustment within 30 days</Text>
         </View>
-        <Ionicons name="chevron-forward" size={14} color="#6B7280" />
+        <Ionicons name="chevron-forward" size={14} color={colors.textSecondary} />
       </TouchableOpacity>
 
       {/* Main Body Split Layout */}
       <View style={styles.bodyContainer}>
         
         {/* Left Vertical Categories Menu */}
-        <View style={styles.leftContainer}>
+        <View style={[styles.leftContainer, { backgroundColor: colors.inputBg || '#F9FAFB', borderRightColor: colors.borderColor }]}>
           <FlatList
             data={LEFT_CATEGORIES}
             keyExtractor={(item) => item.id}
@@ -81,11 +82,11 @@ export default function CategoriesScreen({ navigation }) {
               const isSelected = activeLeftCat === item.id;
               return (
                 <TouchableOpacity 
-                  style={[styles.leftItem, isSelected && styles.activeLeftItem]}
+                  style={[styles.leftItem, isSelected && [styles.activeLeftItem, { backgroundColor: colors.background }]]}
                   onPress={() => setActiveLeftCat(item.id)}
                 >
                   {isSelected && <View style={styles.activeLeftIndicator} />}
-                  <Text style={[styles.leftItemText, isSelected && styles.activeLeftItemText]} numberOfLines={2}>
+                  <Text style={[styles.leftItemText, { color: colors.textSecondary }, isSelected && [styles.activeLeftItemText, { color: colors.textPrimary }]]} numberOfLines={2}>
                     {item.name}
                   </Text>
                 </TouchableOpacity>
@@ -95,7 +96,7 @@ export default function CategoriesScreen({ navigation }) {
         </View>
 
         {/* Right Sub-Categories Grid (Strictly 3 Columns with safe padding) */}
-        <View style={styles.rightContainer}>
+        <View style={[styles.rightContainer, { backgroundColor: colors.background }]}>
           <FlatList
             data={gridData}
             keyExtractor={(item) => item.id.toString()}
@@ -109,10 +110,10 @@ export default function CategoriesScreen({ navigation }) {
                     style={styles.subCategoryCard}
                     onPress={() => navigation.navigate('CategoryProducts', { categoryId: activeLeftCat })}
                   >
-                    <View style={styles.viewAllCircle}>
-                      <Ionicons name="grid" size={22} color="#4B5563" />
+                    <View style={[styles.viewAllCircle, { backgroundColor: colors.inputBg, borderColor: colors.borderColor }]}>
+                      <Ionicons name="grid" size={22} color={colors.textSecondary} />
                     </View>
-                    <Text style={styles.subCatText} numberOfLines={1}>View All</Text>
+                    <Text style={[styles.subCatText, { color: colors.textPrimary }]} numberOfLines={1}>View All</Text>
                   </TouchableOpacity>
                 );
               }
@@ -123,14 +124,14 @@ export default function CategoriesScreen({ navigation }) {
                   onPress={() => navigation.navigate('CategoryProducts', { subCategory: item.name })}
                 >
                   <View style={styles.imageContainer}>
-                    <Image source={{ uri: item.image }} style={styles.subCatImage} />
+                    <Image source={{ uri: item.image }} style={[styles.subCatImage, { backgroundColor: colors.inputBg }]} />
                     {item.isHot && (
                       <View style={styles.hotBadge}>
                         <Text style={styles.hotText}>HOT</Text>
                       </View>
                     )}
                   </View>
-                  <Text style={styles.subCatText} numberOfLines={2}>{item.name}</Text>
+                  <Text style={[styles.subCatText, { color: colors.textPrimary }]} numberOfLines={2}>{item.name}</Text>
                 </TouchableOpacity>
               );
             }}
@@ -151,33 +152,27 @@ export default function CategoriesScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
   },
   searchHeader: {
     flexDirection: 'row',
     paddingHorizontal: 12,
     paddingVertical: 8,
-    backgroundColor: '#FFFFFF',
     alignItems: 'center',
     borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6',
   },
   searchBar: {
     flex: 1,
     flexDirection: 'row',
-    backgroundColor: '#F3F4F6',
     borderRadius: 24,
     alignItems: 'center',
     paddingHorizontal: 12,
     height: 40,
     marginRight: 8,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
   },
   searchInput: {
     flex: 1,
     fontSize: 14,
-    color: '#1F2937',
     paddingVertical: 0,
   },
   cameraIconBtn: {
@@ -186,7 +181,6 @@ const styles = StyleSheet.create({
   searchIconButton: {
     width: 40,
     height: 40,
-    backgroundColor: '#000000',
     borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
@@ -197,9 +191,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 12,
     paddingVertical: 8,
-    backgroundColor: '#FFFBEB',
     borderBottomWidth: 1,
-    borderBottomColor: '#FEF3C7',
   },
   infoItem: {
     flexDirection: 'row',
@@ -207,7 +199,6 @@ const styles = StyleSheet.create({
   },
   infoText: {
     fontSize: 11,
-    color: '#166534',
     fontWeight: '600',
   },
   bodyContainer: {
@@ -217,9 +208,7 @@ const styles = StyleSheet.create({
   },
   leftContainer: {
     width: 115,
-    backgroundColor: '#F9FAFB',
     borderRightWidth: 1,
-    borderRightColor: '#E5E7EB',
   },
   leftItem: {
     paddingVertical: 14,
@@ -229,7 +218,7 @@ const styles = StyleSheet.create({
     minHeight: 50,
   },
   activeLeftItem: {
-    backgroundColor: '#FFFFFF',
+    // Background color dynamically handled inline via colors.background
   },
   activeLeftIndicator: {
     position: 'absolute',
@@ -242,16 +231,13 @@ const styles = StyleSheet.create({
   },
   leftItemText: {
     fontSize: 12,
-    color: '#4B5563',
     fontWeight: '500',
   },
   activeLeftItemText: {
-    color: '#000000',
     fontWeight: '700',
   },
   rightContainer: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
   },
   subCategoryCard: {
     width: '31%',
@@ -263,12 +249,10 @@ const styles = StyleSheet.create({
     width: 58,
     height: 58,
     borderRadius: 29,
-    backgroundColor: '#F3F4F6',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 6,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
   },
   imageContainer: {
     position: 'relative',
@@ -278,7 +262,6 @@ const styles = StyleSheet.create({
     width: 58,
     height: 58,
     borderRadius: 29,
-    backgroundColor: '#F3F4F6',
   },
   hotBadge: {
     position: 'absolute',
@@ -296,7 +279,6 @@ const styles = StyleSheet.create({
   },
   subCatText: {
     fontSize: 11,
-    color: '#374151',
     textAlign: 'center',
     fontWeight: '500',
   },

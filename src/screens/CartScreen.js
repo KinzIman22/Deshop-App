@@ -10,9 +10,11 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CartContext } from '../context/CartContext';
+import { useTheme } from '../context/ThemeContext';
 
 export default function CartScreen({ navigation }) {
   const { cartItems, updateQuantity, removeFromCart } = useContext(CartContext);
+  const { colors } = useTheme();
   const insets = useSafeAreaInsets();
 
   // States for Manage / Share menu and modals
@@ -78,43 +80,43 @@ export default function CartScreen({ navigation }) {
   }, 0);
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
+    <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom, backgroundColor: colors.background }]}>
       {/* Top Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, { backgroundColor: colors.headerBg, borderBottomColor: colors.borderColor }]}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Ionicons name="chevron-back" size={24} color="#000" />
+          <Ionicons name="chevron-back" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
         <View style={styles.selectAllRow}>
           <View style={styles.checkboxSelected}>
             <Ionicons name="checkmark" size={14} color="#FFF" />
           </View>
-          <Text style={styles.headerTitle}>All</Text>
+          <Text style={[styles.headerTitle, { color: colors.textPrimary }]}>All</Text>
         </View>
-        <Text style={styles.cartTitle}>Cart ({cartItems.length})</Text>
+        <Text style={[styles.cartTitle, { color: colors.textPrimary }]}>Cart ({cartItems.length})</Text>
         
         {/* Menu Icon & Dropdown Toggle */}
         <TouchableOpacity onPress={() => setMenuVisible(!menuVisible)}>
-          <Ionicons name="menu-outline" size={24} color="#000" />
+          <Ionicons name="menu-outline" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
       </View>
 
       {/* Floating Menu Popover (Manage cart / Share cart) */}
       {menuVisible && (
-        <View style={styles.menuPopover}>
+        <View style={[styles.menuPopover, { backgroundColor: colors.cardBg, borderColor: colors.borderColor, borderWidth: 1 }]}>
           <TouchableOpacity 
             style={styles.menuItem} 
             onPress={() => openModal('share')}
           >
-            <Ionicons name="share-social-outline" size={18} color="#374151" style={{ marginRight: 8 }} />
-            <Text style={styles.menuItemText}>Share cart</Text>
+            <Ionicons name="share-social-outline" size={18} color={colors.textSecondary} style={{ marginRight: 8 }} />
+            <Text style={[styles.menuItemText, { color: colors.textPrimary }]}>Share cart</Text>
           </TouchableOpacity>
-          <View style={styles.menuDivider} />
+          <View style={[styles.menuDivider, { backgroundColor: colors.dividerColor }]} />
           <TouchableOpacity 
             style={styles.menuItem} 
             onPress={() => openModal('manage')}
           >
-            <Ionicons name="create-outline" size={18} color="#374151" style={{ marginRight: 8 }} />
-            <Text style={styles.menuItemText}>Manage cart</Text>
+            <Ionicons name="create-outline" size={18} color={colors.textSecondary} style={{ marginRight: 8 }} />
+            <Text style={[styles.menuItemText, { color: colors.textPrimary }]}>Manage cart</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -128,36 +130,36 @@ export default function CartScreen({ navigation }) {
         </View>
 
         {/* Filter Tags */}
-        <View style={styles.filterRow}>
+        <View style={[styles.filterRow, { backgroundColor: colors.headerBg }]}>
           <View style={styles.filterChipActive}>
             <Text style={styles.filterTextActive}>All({cartItems.length})</Text>
           </View>
-          <View style={styles.filterChip}>
-            <Text style={styles.filterText}>Selected({cartItems.length})</Text>
+          <View style={[styles.filterChip, { backgroundColor: colors.inputBg }]}>
+            <Text style={[styles.filterText, { color: colors.textSecondary }]}>Selected({cartItems.length})</Text>
           </View>
         </View>
 
         {/* Dynamic Cart Items List */}
         {cartItems.length === 0 ? (
           <View style={styles.emptyContainer}>
-            <Ionicons name="cart-outline" size={60} color="#9CA3AF" />
-            <Text style={styles.emptyText}>Your cart is empty!</Text>
+            <Ionicons name="cart-outline" size={60} color={colors.textSecondary} />
+            <Text style={[styles.emptyText, { color: colors.textSecondary }]}>Your cart is empty!</Text>
             <TouchableOpacity style={styles.shopNowBtn} onPress={() => navigation.navigate('HomeTab')}>
               <Text style={styles.shopNowText}>Start Shopping</Text>
             </TouchableOpacity>
           </View>
         ) : (
           cartItems.map((item, index) => (
-            <View key={`${item.id}-${item.selectedColor}-${index}`} style={styles.cartItemContainer}>
+            <View key={`${item.id}-${item.selectedColor}-${index}`} style={[styles.cartItemContainer, { backgroundColor: colors.cardBg }]}>
               <View style={styles.storeItemRow}>
                 <View style={styles.checkboxSelected}>
                   <Ionicons name="checkmark" size={14} color="#FFF" />
                 </View>
-                <Text style={styles.storeName} numberOfLines={1}>
+                <Text style={[styles.storeName, { color: colors.textPrimary }]} numberOfLines={1}>
                   {item.title}
                 </Text>
                 <TouchableOpacity onPress={() => removeFromCart(item.id, item.selectedColor)}>
-                  <Ionicons name="trash-outline" size={18} color="#9CA3AF" style={{ marginLeft: 'auto' }} />
+                  <Ionicons name="trash-outline" size={18} color={colors.textSecondary} style={{ marginLeft: 'auto' }} />
                 </TouchableOpacity>
               </View>
 
@@ -168,16 +170,16 @@ export default function CartScreen({ navigation }) {
                   style={styles.productImg} 
                 />
                 <View style={{ flex: 1, marginLeft: 10 }}>
-                  <TouchableOpacity style={styles.variantSelectorChip}>
-                    <Text style={styles.variantChipText}>{item.selectedColor || 'Standard'}</Text>
-                    <Ionicons name="chevron-down" size={12} color="#374151" style={{ marginLeft: 4 }} />
+                  <TouchableOpacity style={[styles.variantSelectorChip, { backgroundColor: colors.inputBg }]}>
+                    <Text style={[styles.variantChipText, { color: colors.textSecondary }]}>{item.selectedColor || 'Standard'}</Text>
+                    <Ionicons name="chevron-down" size={12} color={colors.textSecondary} style={{ marginLeft: 4 }} />
                   </TouchableOpacity>
 
                   <View style={styles.priceQtyRow}>
                     <View>
                       <Text style={styles.originalPrice}>{item.originalPrice || "Rs.575"}</Text>
                       <View style={{ flexDirection: 'row', alignItems: 'baseline' }}>
-                        <Text style={styles.currentPrice}>{item.price || item.currentPrice || "Rs.267"}</Text>
+                        <Text style={[styles.currentPrice, { color: colors.textPrimary }]}>{item.price || item.currentPrice || "Rs.267"}</Text>
                         <View style={styles.discountBadge}>
                           <Text style={styles.discountBadgeTxt}>{item.discount || "-53%"}</Text>
                         </View>
@@ -185,18 +187,18 @@ export default function CartScreen({ navigation }) {
                     </View>
 
                     {/* Dynamic Qty Counter */}
-                    <View style={styles.counterContainer}>
+                    <View style={[styles.counterContainer, { borderColor: colors.borderColor }]}>
                       <TouchableOpacity onPress={() => updateQuantity(item.id, item.selectedColor, -1)}>
-                        <Ionicons name="remove" size={14} color="#9CA3AF" />
+                        <Ionicons name="remove" size={14} color={colors.textSecondary} />
                       </TouchableOpacity>
-                      <Text style={styles.qtyNum}>{item.quantity}</Text>
+                      <Text style={[styles.qtyNum, { color: colors.textPrimary }]}>{item.quantity}</Text>
                       <TouchableOpacity onPress={() => updateQuantity(item.id, item.selectedColor, 1)}>
-                        <Ionicons name="add" size={14} color="#374151" />
+                        <Ionicons name="add" size={14} color={colors.textSecondary} />
                       </TouchableOpacity>
                     </View>
                   </View>
 
-                  <Text style={styles.promoAppliedText}>after applying promos</Text>
+                  <Text style={[styles.promoAppliedText, { color: colors.textSecondary }]}>after applying promos</Text>
                 </View>
               </View>
             </View>
@@ -204,41 +206,41 @@ export default function CartScreen({ navigation }) {
         )}
 
         {/* Guarantee Info Box */}
-        <View style={styles.guaranteeBox}>
-          <Ionicons name="information-circle-outline" size={14} color="#6B7280" style={{ marginRight: 4 }} />
-          <Text style={styles.guaranteeText}>
+        <View style={[styles.guaranteeBox, { backgroundColor: colors.cardBg }]}>
+          <Ionicons name="information-circle-outline" size={14} color={colors.textSecondary} style={{ marginRight: 4 }} />
+          <Text style={[styles.guaranteeText, { color: colors.textSecondary }]}>
             Item availability and pricing are not guaranteed until payment is final.
           </Text>
         </View>
 
         {/* Protection Badges */}
-        <View style={styles.badgesContainer}>
+        <View style={[styles.badgesContainer, { backgroundColor: colors.cardBg }]}>
           <View style={styles.badgeItem}>
             <View style={styles.badgeIconWrapper}>
               <Ionicons name="shield-checkmark-outline" size={18} color="#166534" />
             </View>
-            <Text style={styles.badgeLabel}>Safe Payment Options</Text>
+            <Text style={[styles.badgeLabel, { color: colors.textPrimary }]}>Safe Payment Options</Text>
           </View>
           <View style={styles.badgeItem}>
             <View style={styles.badgeIconWrapper}>
               <Ionicons name="lock-closed-outline" size={18} color="#166534" />
             </View>
-            <Text style={styles.badgeLabel}>Secure privacy</Text>
+            <Text style={[styles.badgeLabel, { color: colors.textPrimary }]}>Secure privacy</Text>
           </View>
           <View style={styles.badgeItem}>
             <View style={styles.badgeIconWrapper}>
               <Ionicons name="cube-outline" size={18} color="#166534" />
             </View>
-            <Text style={styles.badgeLabel}>Temu Purchase Protection</Text>
+            <Text style={[styles.badgeLabel, { color: colors.textPrimary }]}>Temu Purchase Protection</Text>
           </View>
         </View>
       </ScrollView>
 
       {/* Checkout Bottom Bar */}
-      <View style={styles.bottomCheckoutBar}>
+      <View style={[styles.bottomCheckoutBar, { backgroundColor: colors.headerBg, borderTopColor: colors.borderColor }]}>
         <View style={{ flexDirection: 'row', alignItems: 'baseline' }}>
           <Text style={styles.bottomPrice}>Rs.{totalPrice * 2}</Text>
-          <Text style={styles.bottomCurrentPrice}>Rs.{totalPrice}</Text>
+          <Text style={[styles.bottomCurrentPrice, { color: colors.textPrimary }]}>Rs.{totalPrice}</Text>
         </View>
         <TouchableOpacity 
           style={styles.checkoutButton} 
@@ -251,15 +253,15 @@ export default function CartScreen({ navigation }) {
       {/* Bottom Sheet Modal for Manage / Share Cart */}
       {modalVisible && (
         <View style={styles.modalOverlay}>
-          <View style={styles.bottomSheetContainer}>
+          <View style={[styles.bottomSheetContainer, { backgroundColor: colors.cardBg }]}>
             
             {/* Modal Header */}
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>
+              <Text style={[styles.modalTitle, { color: colors.textPrimary }]}>
                 {modalType === 'manage' ? 'Manage cart' : 'Share cart'}
               </Text>
               <TouchableOpacity onPress={() => setModalVisible(false)}>
-                <Ionicons name="close" size={22} color="#000" />
+                <Ionicons name="close" size={22} color={colors.textPrimary} />
               </TouchableOpacity>
             </View>
 
@@ -271,11 +273,11 @@ export default function CartScreen({ navigation }) {
                 return (
                   <TouchableOpacity 
                     key={`modal-${index}`} 
-                    style={styles.modalItemRow}
+                    style={[styles.modalItemRow, { backgroundColor: colors.inputNameBg || colors.inputBg }]}
                     activeOpacity={0.9}
                     onPress={() => toggleSelectItem(key)}
                   >
-                    <View style={[styles.modalCheckbox, isChecked ? styles.checkboxCheckedBg : styles.checkboxUncheckedBg]}>
+                    <View style={[styles.modalCheckbox, isChecked ? styles.checkboxCheckedBg : [styles.checkboxUncheckedBg, { borderColor: colors.textSecondary }]]}>
                       {isChecked && <Ionicons name="checkmark" size={14} color="#FFF" />}
                     </View>
                     <Image 
@@ -283,16 +285,16 @@ export default function CartScreen({ navigation }) {
                       style={styles.modalProductImg} 
                     />
                     <View style={{ flex: 1, marginLeft: 10 }}>
-                      <Text numberOfLines={1} style={styles.modalItemTitle}>{item.title}</Text>
-                      <Text style={styles.modalItemVariant}>{item.selectedColor || 'Standard'} x{item.quantity}</Text>
+                      <Text numberOfLines={1} style={[styles.modalItemTitle, { color: colors.textPrimary }]}>{item.title}</Text>
+                      <Text style={[styles.modalItemVariant, { color: colors.textSecondary }]}>{item.selectedColor || 'Standard'} x{item.quantity}</Text>
                       <View style={{ flexDirection: 'row', alignItems: 'baseline', marginTop: 4 }}>
                         <Text style={styles.modalOriginalPrice}>Rs.575</Text>
-                        <Text style={styles.modalCurrentPrice}>{item.price || item.currentPrice || 'Rs.267'}</Text>
+                        <Text style={[styles.modalCurrentPrice, { color: colors.textPrimary }]}>{item.price || item.currentPrice || 'Rs.267'}</Text>
                         <View style={styles.discountBadge}>
                           <Text style={styles.discountBadgeTxt}>-53%</Text>
                         </View>
                       </View>
-                      <Text style={styles.promoAppliedText}>after applying promos &gt;</Text>
+                      <Text style={[styles.promoAppliedText, { color: colors.textSecondary }]}>after applying promos &gt;</Text>
                     </View>
                   </TouchableOpacity>
                 );
@@ -300,17 +302,17 @@ export default function CartScreen({ navigation }) {
             </ScrollView>
 
             {/* Modal Footer (Select All & Action Button) */}
-            <View style={styles.modalFooter}>
+            <View style={[styles.modalFooter, { borderTopColor: colors.borderColor }]}>
               <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center' }} onPress={toggleSelectAll}>
-                <View style={[styles.modalCheckbox, allSelected ? styles.checkboxCheckedBg : styles.checkboxUncheckedBg]}>
+                <View style={[styles.modalCheckbox, allSelected ? styles.checkboxCheckedBg : [styles.checkboxUncheckedBg, { borderColor: colors.textSecondary }]]}>
                   {allSelected && <Ionicons name="checkmark" size={14} color="#FFF" />}
                 </View>
-                <Text style={{ fontWeight: 'bold', fontSize: 13, marginLeft: 6 }}>All</Text>
+                <Text style={[{ fontWeight: 'bold', fontSize: 13, marginLeft: 6 }, { color: colors.textPrimary }]}>All</Text>
               </TouchableOpacity>
 
               {modalType === 'manage' ? (
-                <TouchableOpacity style={styles.removeBtn} onPress={handleRemoveSelected}>
-                  <Text style={styles.removeBtnText}>Remove</Text>
+                <TouchableOpacity style={[styles.removeBtn, { borderColor: colors.borderColor }]} onPress={handleRemoveSelected}>
+                  <Text style={[styles.removeBtnText, { color: colors.textPrimary }]}>Remove</Text>
                 </TouchableOpacity>
               ) : (
                 <TouchableOpacity style={styles.shareNowBtn} onPress={() => {
@@ -332,15 +334,13 @@ export default function CartScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F3F4F6' },
+  container: { flex: 1 },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: '#FFF',
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
   },
   selectAllRow: { flexDirection: 'row', alignItems: 'center', marginLeft: 16 },
   checkboxSelected: {
@@ -352,13 +352,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginRight: 6,
   },
-  headerTitle: { fontSize: 14, fontWeight: 'bold', color: '#111827' },
-  cartTitle: { fontSize: 16, fontWeight: 'bold', color: '#111827', marginLeft: 16, flex: 1 },
+  headerTitle: { fontSize: 14, fontWeight: 'bold' },
+  cartTitle: { fontSize: 16, fontWeight: 'bold', marginLeft: 16, flex: 1 },
   menuPopover: {
     position: 'absolute',
     top: 55,
     right: 12,
-    backgroundColor: '#FFF',
     borderRadius: 8,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -377,12 +376,10 @@ const styles = StyleSheet.create({
   },
   menuItemText: {
     fontSize: 13,
-    color: '#374151',
     fontWeight: '500',
   },
   menuDivider: {
     height: 1,
-    backgroundColor: '#F3F4F6',
   },
   freeShippingBanner: {
     flexDirection: 'row',
@@ -393,7 +390,7 @@ const styles = StyleSheet.create({
   },
   freeShippingText: { flex: 1, color: '#166534', fontSize: 12, fontWeight: '500' },
   limitedTimeText: { color: '#166534', fontSize: 11, fontWeight: 'bold' },
-  filterRow: { flexDirection: 'row', padding: 12, backgroundColor: '#FFF' },
+  filterRow: { flexDirection: 'row', padding: 12 },
   filterChipActive: {
     backgroundColor: '#000',
     paddingHorizontal: 14,
@@ -403,35 +400,32 @@ const styles = StyleSheet.create({
   },
   filterTextActive: { color: '#FFF', fontSize: 12, fontWeight: 'bold' },
   filterChip: {
-    backgroundColor: '#F3F4F6',
     paddingHorizontal: 14,
     paddingVertical: 6,
     borderRadius: 16,
   },
-  filterText: { color: '#374151', fontSize: 12, fontWeight: '600' },
+  filterText: { fontSize: 12, fontWeight: '600' },
   emptyContainer: { alignItems: 'center', justifyContent: 'center', marginTop: 80 },
-  emptyText: { fontSize: 16, color: '#4B5563', marginTop: 10, fontWeight: '600' },
+  emptyText: { fontSize: 16, marginTop: 10, fontWeight: '600' },
   shopNowBtn: { backgroundColor: '#EA580C', paddingHorizontal: 20, paddingVertical: 10, borderRadius: 20, marginTop: 15 },
   shopNowText: { color: '#FFF', fontWeight: 'bold' },
   cartItemContainer: {
-    backgroundColor: '#FFF',
     marginTop: 8,
     padding: 12,
   },
   storeItemRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 10 },
-  storeName: { fontSize: 13, color: '#374151', fontWeight: '500', maxWidth: '75%' },
+  storeName: { fontSize: 13, fontWeight: '500', maxWidth: '75%' },
   productRow: { flexDirection: 'row' },
   productImg: { width: 80, height: 80, borderRadius: 8, backgroundColor: '#E5E7EB' },
   variantSelectorChip: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F3F4F6',
     alignSelf: 'flex-start',
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 4,
   },
-  variantChipText: { fontSize: 11, color: '#374151', fontWeight: '500' },
+  variantChipText: { fontSize: 11, fontWeight: '500' },
   priceQtyRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -439,7 +433,7 @@ const styles = StyleSheet.create({
     marginTop: 6,
   },
   originalPrice: { fontSize: 11, color: '#9CA3AF', textDecorationLine: 'line-through' },
-  currentPrice: { fontSize: 15, fontWeight: 'bold', color: '#111827' },
+  currentPrice: { fontSize: 15, fontWeight: 'bold' },
   discountBadge: {
     backgroundColor: '#FFEDD5',
     paddingHorizontal: 4,
@@ -452,25 +446,22 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#D1D5DB',
     borderRadius: 4,
     paddingHorizontal: 6,
     paddingVertical: 2,
   },
-  qtyNum: { marginHorizontal: 8, fontSize: 12, fontWeight: 'bold', color: '#111827' },
-  promoAppliedText: { fontSize: 10, color: '#6B7280', marginTop: 4 },
+  qtyNum: { marginHorizontal: 8, fontSize: 12, fontWeight: 'bold' },
+  promoAppliedText: { fontSize: 10, marginTop: 4 },
   guaranteeBox: {
     flexDirection: 'row',
     alignItems: 'center',
     padding: 12,
-    backgroundColor: '#FFF',
     marginTop: 8,
   },
-  guaranteeText: { fontSize: 11, color: '#6B7280', flex: 1 },
+  guaranteeText: { fontSize: 11, flex: 1 },
   badgesContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    backgroundColor: '#FFF',
     paddingVertical: 16,
     marginTop: 8,
     paddingHorizontal: 8,
@@ -487,22 +478,20 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#DCFCE7',
   },
-  badgeLabel: { fontSize: 10, color: '#374151', textAlign: 'center', fontWeight: '500' },
+  badgeLabel: { fontSize: 10, textAlign: 'center', fontWeight: '500' },
   bottomCheckoutBar: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: '#FFF',
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderTopWidth: 1,
-    borderTopColor: '#E5E7EB',
   },
   bottomPrice: { fontSize: 12, color: '#9CA3AF', textDecorationLine: 'line-through' },
-  bottomCurrentPrice: { fontSize: 16, fontWeight: 'bold', color: '#111827', marginRight: 16 },
+  bottomCurrentPrice: { fontSize: 16, fontWeight: 'bold', marginRight: 16 },
   checkoutButton: {
     flex: 1,
     backgroundColor: '#EA580C',
@@ -524,7 +513,6 @@ const styles = StyleSheet.create({
     zIndex: 1000,
   },
   bottomSheetContainer: {
-    backgroundColor: '#FFF',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     padding: 16,
@@ -539,12 +527,10 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#111827',
   },
   modalItemRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F9FAFB',
     padding: 10,
     borderRadius: 8,
     marginBottom: 10,
@@ -562,7 +548,6 @@ const styles = StyleSheet.create({
   },
   checkboxUncheckedBg: {
     borderWidth: 1,
-    borderColor: '#9CA3AF',
     backgroundColor: '#FFF',
   },
   modalProductImg: {
@@ -573,11 +558,9 @@ const styles = StyleSheet.create({
   },
   modalItemTitle: {
     fontSize: 12,
-    color: '#374151',
   },
   modalItemVariant: {
     fontSize: 11,
-    color: '#6B7280',
     marginTop: 2,
   },
   modalOriginalPrice: {
@@ -589,7 +572,6 @@ const styles = StyleSheet.create({
   modalCurrentPrice: {
     fontSize: 14,
     fontWeight: 'bold',
-    color: '#111827',
   },
   modalFooter: {
     flexDirection: 'row',
@@ -597,19 +579,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 10,
     borderTopWidth: 1,
-    borderTopColor: '#E5E7EB',
     paddingTop: 12,
   },
   removeBtn: {
     borderWidth: 1,
-    borderColor: '#D1D5DB',
     paddingHorizontal: 24,
     paddingVertical: 10,
     borderRadius: 20,
   },
   removeBtnText: {
     fontWeight: 'bold',
-    color: '#111827',
     fontSize: 13,
   },
   shareNowBtn: {

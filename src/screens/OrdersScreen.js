@@ -1,14 +1,35 @@
 // src/screens/OrdersScreen.js
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRoute, useNavigation } from '@react-navigation/native';
 
+// Import ThemeContext
+import { ThemeContext } from '../context/ThemeContext';
+
 export default function OrdersScreen() {
   const insets = useSafeAreaInsets();
   const route = useRoute();
   const navigation = useNavigation();
+
+  // Access global ThemeContext instead of local state
+  const { isDarkMode } = useContext(ThemeContext);
+
+  // Dynamic Theme Colors consistent with HomeScreen, ProfileScreen & OrderDetailScreen
+  const theme = {
+    bg: isDarkMode ? '#121212' : '#F3F4F6',
+    card: isDarkMode ? '#1E1E1E' : '#FFFFFF',
+    text: isDarkMode ? '#F3F4F6' : '#1F2937',
+    textSecondary: isDarkMode ? '#9CA3AF' : '#6B7280',
+    border: isDarkMode ? '#2D2D2D' : '#E5E7EB',
+    accent: '#F97316',
+    activeTabBg: isDarkMode ? '#3B2219' : '#FFF7ED',
+    tabText: isDarkMode ? '#9CA3AF' : '#4B5563',
+    activeTabText: '#F97316',
+    badgeBg: isDarkMode ? '#3B2219' : '#FFF7ED',
+    badgeText: '#F97316',
+  };
 
   // Sabhi possible order statuses
   const tabs = ['Pending', 'Processing', 'Shipped', 'Review', 'Preorder'];
@@ -45,30 +66,46 @@ export default function OrdersScreen() {
   };
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
-      <View style={styles.header}>
+    <View style={[styles.container, { paddingTop: insets.top, backgroundColor: theme.bg }]}>
+      
+      {/* Header */}
+      <View style={[styles.header, { backgroundColor: theme.card, borderBottomColor: theme.border }]}>
         <TouchableOpacity 
           style={styles.backButton} 
           onPress={handleGoBack}
           activeOpacity={0.8}
         >
-          <Ionicons name="arrow-back" size={24} color="#1F2937" />
+          <Ionicons name="arrow-back" size={24} color={theme.text} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>My Orders</Text>
-        <View style={styles.emptySpacer} />
+        <Text style={[styles.headerTitle, { color: theme.text }]}>My Orders</Text>
+        
+        {/* Empty view to balance the header layout */}
+        <View style={{ width: 28 }} />
       </View>
 
       {/* Tabs / Filter Bar */}
-      <View style={styles.tabContainer}>
-        {tabs.map(tab => (
-          <TouchableOpacity
-            key={tab}
-            style={[styles.tabButton, activeTab === tab && styles.activeTabButton]}
-            onPress={() => setActiveTab(tab)}
-          >
-            <Text style={[styles.tabText, activeTab === tab && styles.activeTabText]}>{tab}</Text>
-          </TouchableOpacity>
-        ))}
+      <View style={[styles.tabContainer, { backgroundColor: theme.card, borderBottomColor: theme.border }]}>
+        {tabs.map(tab => {
+          const isActive = activeTab === tab;
+          return (
+            <TouchableOpacity
+              key={tab}
+              style={[
+                styles.tabButton, 
+                isActive && { backgroundColor: theme.activeTabBg }
+              ]}
+              onPress={() => setActiveTab(tab)}
+            >
+              <Text style={[
+                styles.tabText, 
+                { color: theme.tabText },
+                isActive && { color: theme.activeTabText, fontWeight: '700' }
+              ]}>
+                {tab}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
       </View>
 
       {/* Orders List for the selected tab */}
@@ -78,27 +115,27 @@ export default function OrdersScreen() {
         contentContainerStyle={styles.listContainer}
         renderItem={({ item }) => (
           <TouchableOpacity 
-            style={styles.orderCard}
+            style={[styles.orderCard, { backgroundColor: theme.card, borderColor: theme.border }]}
             onPress={() => navigation.navigate('OrderDetail', { order: item })}
             activeOpacity={0.8}
           >
             <View style={styles.orderCardHeader}>
-              <Text style={styles.orderNo}>{item.orderNo}</Text>
-              <Text style={styles.orderDate}>{item.date}</Text>
+              <Text style={[styles.orderNo, { color: theme.text }]}>{item.orderNo}</Text>
+              <Text style={[styles.orderDate, { color: theme.textSecondary }]}>{item.date}</Text>
             </View>
-            <Text style={styles.orderItemName}>{item.items}</Text>
-            <View style={styles.orderCardFooter}>
-              <Text style={styles.orderTotal}>{item.total}</Text>
-              <View style={styles.statusBadge}>
-                <Text style={styles.statusBadgeText}>{item.status}</Text>
+            <Text style={[styles.orderItemName, { color: theme.textSecondary }]}>{item.items}</Text>
+            <View style={[styles.orderCardFooter, { borderTopColor: theme.border }]}>
+              <Text style={[styles.orderTotal, { color: theme.accent }]}>{item.total}</Text>
+              <View style={[styles.statusBadge, { backgroundColor: theme.badgeBg }]}>
+                <Text style={[styles.statusBadgeText, { color: theme.badgeText }]}>{item.status}</Text>
               </View>
             </View>
           </TouchableOpacity>
         )}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
-            <Ionicons name="cube-outline" size={50} color="#9CA3AF" />
-            <Text style={styles.emptyText}>No {activeTab.toLowerCase()} orders found.</Text>
+            <Ionicons name="cube-outline" size={50} color={theme.textSecondary} />
+            <Text style={[styles.emptyText, { color: theme.textSecondary }]}>No {activeTab.toLowerCase()} orders found.</Text>
           </View>
         }
       />
@@ -107,35 +144,98 @@ export default function OrdersScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F3F4F6' },
+  container: { 
+    flex: 1, 
+  },
   header: { 
     flexDirection: 'row', 
     alignItems: 'center', 
     justifyContent: 'space-between', 
     paddingHorizontal: 16, 
     paddingVertical: 12, 
-    backgroundColor: '#FFFFFF', 
     borderBottomWidth: 1, 
-    borderBottomColor: '#E5E7EB' 
   },
-  backButton: { padding: 4 },
-  headerTitle: { fontSize: 18, fontWeight: '700', color: '#1F2937', textAlign: 'center' },
-  emptySpacer: { width: 24, height: 24 },
-  tabContainer: { flexDirection: 'row', backgroundColor: '#FFFFFF', paddingHorizontal: 6, paddingVertical: 8, justifyContent: 'space-around', borderBottomWidth: 1, borderBottomColor: '#E5E7EB' },
-  tabButton: { paddingVertical: 6, paddingHorizontal: 8, borderRadius: 12 },
-  activeTabButton: { backgroundColor: '#FEF2F2' },
-  tabText: { fontSize: 12, color: '#4B5563', fontWeight: '600' },
-  activeTabText: { color: '#EF4444' },
-  listContainer: { padding: 12 },
-  orderCard: { backgroundColor: '#FFFFFF', borderRadius: 10, padding: 14, marginBottom: 12, borderWidth: 1, borderColor: '#E5E7EB' },
-  orderCardHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 },
-  orderNo: { fontSize: 14, fontWeight: '700', color: '#1F2937' },
-  orderDate: { fontSize: 12, color: '#9CA3AF' },
-  orderItemName: { fontSize: 13, color: '#4B5563', marginBottom: 10 },
-  orderCardFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderTopWidth: 1, borderTopColor: '#F3F4F6', paddingTop: 8 },
-  orderTotal: { fontSize: 14, fontWeight: '700', color: '#EF4444' },
-  statusBadge: { backgroundColor: '#FEF2F2', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6 },
-  statusBadgeText: { fontSize: 11, fontWeight: '700', color: '#EF4444' },
-  emptyContainer: { alignItems: 'center', justifyContent: 'center', marginTop: 50 },
-  emptyText: { marginTop: 10, fontSize: 14, color: '#9CA3AF' }
+  backButton: { 
+    padding: 4,
+  },
+  headerTitle: { 
+    fontSize: 18, 
+    fontWeight: '700', 
+    textAlign: 'center',
+  },
+  tabContainer: { 
+    flexDirection: 'row', 
+    paddingHorizontal: 6, 
+    paddingVertical: 8, 
+    justifyContent: 'space-around', 
+    borderBottomWidth: 1, 
+  },
+  tabButton: { 
+    paddingVertical: 6, 
+    paddingHorizontal: 8, 
+    borderRadius: 12,
+  },
+  tabText: { 
+    fontSize: 12, 
+    fontWeight: '600', 
+  },
+  listContainer: { 
+    padding: 12, 
+  },
+  orderCard: { 
+    borderRadius: 10, 
+    padding: 14, 
+    marginBottom: 12, 
+    borderWidth: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  orderCardHeader: { 
+    flexDirection: 'row', 
+    justifyContent: 'space-between', 
+    marginBottom: 6, 
+  },
+  orderNo: { 
+    fontSize: 14, 
+    fontWeight: '700', 
+  },
+  orderDate: { 
+    fontSize: 12, 
+  },
+  orderItemName: { 
+    fontSize: 13, 
+    marginBottom: 10, 
+  },
+  orderCardFooter: { 
+    flexDirection: 'row', 
+    justifyContent: 'space-between', 
+    alignItems: 'center', 
+    borderTopWidth: 1, 
+    paddingTop: 8, 
+  },
+  orderTotal: { 
+    fontSize: 14, 
+    fontWeight: '700', 
+  },
+  statusBadge: { 
+    paddingHorizontal: 8, 
+    paddingVertical: 3, 
+    borderRadius: 6, 
+  },
+  statusBadgeText: { 
+    fontSize: 11, 
+    fontWeight: '700', 
+  },
+  emptyContainer: { 
+    alignItems: 'center', 
+    justifyContent: 'center', 
+    marginTop: 50, 
+  },
+  emptyText: { 
+    marginTop: 10, 
+    fontSize: 14, 
+  }
 });

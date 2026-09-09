@@ -7,25 +7,27 @@ import CartScreen from '../screens/CartScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 
 import { Ionicons } from '@expo/vector-icons';
+import { useTheme } from '../context/ThemeContext';
 
 const Tab = createBottomTabNavigator();
 
 export default function BottomTabNavigator() {
+  const { colors, isDarkMode } = useTheme();
+
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
         tabBarActiveTintColor: '#F97316',
-        tabBarInactiveTintColor: '#9CA3AF',
-        // Ye line poore project ki sabhi tab screens ki stretching aur skewing ko fix kar degi:
+        tabBarInactiveTintColor: isDarkMode ? '#9CA3AF' : '#6B7280',
         sceneContainerStyle: {
           flex: 1,
-          backgroundColor: '#FFFFFF',
+          backgroundColor: colors.background,
         },
         tabBarStyle: {
-          backgroundColor: '#FFFFFF',
+          backgroundColor: colors.cardBg || colors.background,
           borderTopWidth: 1,
-          borderTopColor: '#E5E7EB',
+          borderTopColor: colors.borderColor,
           height: 60,
           paddingBottom: 8,
           paddingTop: 6,

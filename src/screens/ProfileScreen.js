@@ -1,5 +1,5 @@
 // src/screens/ProfileScreen.js
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useCallback } from 'react';
 import { 
   View, 
   Text, 
@@ -8,17 +8,19 @@ import {
   ScrollView,
   Image,
   Alert,
-  ActivityIndicator,
-  FlatList
+  ActivityIndicator
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute, useFocusEffect } from '@react-navigation/native';
 import * as ImagePicker from 'expo-image-picker';
 import { LinearGradient } from 'expo-linear-gradient';
 
 // Import CartContext
 import { CartContext } from '../context/CartContext';
+
+// Import ThemeContext
+import { ThemeContext } from '../context/ThemeContext';
 
 // Import data handler
 import { fetchHotSaleProducts } from '../data/hotSaleData';
@@ -26,12 +28,40 @@ import { fetchHotSaleProducts } from '../data/hotSaleData';
 export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
+  const route = useRoute();
 
   // Access cart items from CartContext
   const { cart, addToCart } = useContext(CartContext);
+  
+  // Access global ThemeContext
+  const { isDarkMode } = useContext(ThemeContext);
 
-  // State for profile image URI
+  // Dynamic Theme Colors consistent with OrdersScreen & other screens
+  const theme = {
+    bg: isDarkMode ? '#121212' : '#F3F4F6',
+    card: isDarkMode ? '#1E1E1E' : '#FFFFFF', 
+    text: isDarkMode ? '#F9FAFB' : '#1F2937',
+    textSecondary: isDarkMode ? '#9CA3AF' : '#6B7280',
+    border: isDarkMode ? '#2D2D2D' : '#E5E7EB',
+    accent: '#F97316',
+    activeTabBg: isDarkMode ? '#3B2219' : '#FFF7ED',
+    tabText: isDarkMode ? '#9CA3AF' : '#4B5563',
+    activeTabText: '#F97316',
+    badgeBg: isDarkMode ? '#3B2219' : '#FFF7ED',
+    badgeText: '#F97316',
+  };
+
+  // State for profile information
   const [profileImage, setProfileImage] = useState(null);
+  const [name, setName] = useState('Ahmed Hammad');
+
+  // Listen to params coming back from EditProfileScreen every time screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      if (route.params?.updatedName) setName(route.params.updatedName);
+      if (route.params?.updatedImage) setProfileImage(route.params.updatedImage);
+    }, [route.params])
+  );
 
   // States for Hot Sale Products
   const [hotSales, setHotSales] = useState([]);
@@ -137,17 +167,18 @@ export default function ProfileScreen() {
     { id: '4', title: 'About Us', icon: 'information-circle-outline', serviceType: 'AboutUs' },
   ];
 
-  // Render function for individual product card inside FlatList
-  const renderProductItem = ({ item }) => (
+  // Render function helper for individual product cards (Hot Sale cards explicitly forced to white background)
+  const renderProductItem = (item) => (
     <TouchableOpacity 
-      style={styles.productCard}
+      key={item.id}
+      style={[styles.productCard, { backgroundColor: '#FFFFFF', borderColor: '#E5E7EB' }]}
       onPress={() => navigateToRoot('CategoryProducts', { productId: item.id })}
     >
       <Image source={{ uri: item.image }} style={styles.productImage} />
-      <Text style={styles.productTitle} numberOfLines={2}>{item.title}</Text>
+      <Text style={[styles.productTitle, { color: '#1F2937' }]} numberOfLines={2}>{item.title}</Text>
       
       <View style={styles.productFooter}>
-        <Text style={styles.productPrice}>{item.price}</Text>
+        <Text style={[styles.productPrice, { color: '#1F2937' }]}>{item.price}</Text>
         
         <TouchableOpacity 
           style={styles.cartButton}
@@ -162,8 +193,24 @@ export default function ProfileScreen() {
     </TouchableOpacity>
   );
 
+  // Helper to group hot sales into pairs for 2-column layout without nested FlatLists
+  const renderProductGrid = () => {
+    const rows = [];
+    for (let i = 0; i < hotSales.length; i += 2) {
+      const firstItem = hotSales[i];
+      const secondItem = hotSales[i + 1];
+      rows.push(
+        <View key={`row-${i}`} style={styles.columnWrapper}>
+          {renderProductItem(firstItem)}
+          {secondItem ? renderProductItem(secondItem) : <View style={[styles.productCard, { backgroundColor: 'transparent', borderWidth: 0 }]} />}
+        </View>
+      );
+    }
+    return rows;
+  };
+
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
+    <View style={[styles.container, { paddingTop: insets.top, backgroundColor: theme.bg }]}>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: insets.bottom + 20 }}>
         
         {/* Top Orange Gradient Header Section */}
@@ -173,16 +220,27 @@ export default function ProfileScreen() {
         >
           <View style={styles.topBarRow}>
             <TouchableOpacity 
-  style={styles.settingsBtn}
-  onPress={() => navigateToRoot('Settings')}
->
-  <Ionicons name="settings-outline" size={24} color="#FFFFFF" />
-</TouchableOpacity>
+              style={[styles.settingsBtn, { marginRight: 8 }]}
+              onPress={() => navigateToRoot('EditProfile')}
+            >
+              <Ionicons name="create-outline" size={22} color="#FFFFFF" />
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              style={[styles.settingsBtn, { marginLeft: 4 }]}
+              onPress={() => navigateToRoot('Settings')}
+            >
+              <Ionicons name="settings-outline" size={22} color="#FFFFFF" />
+            </TouchableOpacity>
           </View>
 
           <View style={styles.userTopRow}>
             <View style={styles.avatarWrapper}>
-              <TouchableOpacity style={styles.avatarContainer} onPress={handleImagePicker} activeOpacity={0.9}>
+              <TouchableOpacity 
+                style={[styles.avatarContainer, { backgroundColor: isDarkMode ? '#2A2A2A' : '#FFFFFF', borderColor: isDarkMode ? '#3A3A3A' : '#FFFFFF' }]} 
+                onPress={handleImagePicker} 
+                activeOpacity={0.9}
+              >
                 {profileImage ? (
                   <Image source={{ uri: profileImage }} style={styles.avatarImage} />
                 ) : (
@@ -196,7 +254,7 @@ export default function ProfileScreen() {
             </View>
 
             <View style={styles.userInfoText}>
-              <Text style={styles.userName}>Ahmed Hammad</Text>
+              <Text style={styles.userName}>{name}</Text>
               <View style={styles.vipBadge}>
                 <Ionicons name="star" size={10} color="#B45309" style={{ marginRight: 3 }} />
                 <Text style={styles.vipText}>Vip Center</Text>
@@ -227,9 +285,9 @@ export default function ProfileScreen() {
         </LinearGradient>
 
         {/* My Orders Section */}
-        <View style={styles.sectionContainer}>
+        <View style={[styles.sectionContainer, { backgroundColor: theme.card, borderColor: theme.border, borderWidth: isDarkMode ? 1 : 0 }]}>
           <View style={styles.sectionHeaderRow}>
-            <Text style={styles.sectionTitle}>My Orders</Text>
+            <Text style={[styles.sectionTitle, { color: theme.text }]}>My Orders</Text>
             <TouchableOpacity onPress={() => navigateToRoot('Orders', { status: 'Pending' })}>
               <Text style={styles.viewAllText}>View All ></Text>
             </TouchableOpacity>
@@ -242,7 +300,7 @@ export default function ProfileScreen() {
                 style={styles.statusItem}
                 onPress={() => navigateToRoot('Orders', { status: item.title })}
               >
-                <View style={styles.iconBox}>
+                <View style={[styles.iconBox, { backgroundColor: isDarkMode ? '#2A2A2A' : '#FEF2F2' }]}>
                   <Ionicons name={item.icon} size={22} color="#EF4444" />
                   {item.badge !== undefined && (
                     <View style={styles.badgeContainer}>
@@ -250,15 +308,15 @@ export default function ProfileScreen() {
                     </View>
                   )}
                 </View>
-                <Text style={styles.statusText} numberOfLines={1}>{item.title}</Text>
+                <Text style={[styles.statusText, { color: theme.textSecondary }]} numberOfLines={1}>{item.title}</Text>
               </TouchableOpacity>
             ))}
           </View>
         </View>
 
         {/* Services Section with Navigation */}
-        <View style={styles.sectionContainer}>
-          <Text style={styles.sectionTitle}>Services</Text>
+        <View style={[styles.sectionContainer, { backgroundColor: theme.card, borderColor: theme.border, borderWidth: isDarkMode ? 1 : 0 }]}>
+          <Text style={[styles.sectionTitle, { color: theme.text }]}>Services</Text>
 
           <View style={styles.servicesRow}>
             {services.map((item) => (
@@ -267,19 +325,19 @@ export default function ProfileScreen() {
                 style={styles.serviceItem}
                 onPress={() => navigateToRoot('Services', { serviceType: item.serviceType })}
               >
-                <View style={styles.iconBox}>
+                <View style={[styles.iconBox, { backgroundColor: isDarkMode ? '#2A2A2A' : '#FEF2F2' }]}>
                   <Ionicons name={item.icon} size={22} color="#EF4444" />
                 </View>
-                <Text style={styles.serviceText} numberOfLines={1}>{item.title}</Text>
+                <Text style={[styles.serviceText, { color: theme.textSecondary }]} numberOfLines={1}>{item.title}</Text>
               </TouchableOpacity>
             ))}
           </View>
         </View>
 
-        {/* Dynamic Hot Sale Section with 2-Column FlatList */}
-        <View style={styles.sectionContainer}>
+        {/* Dynamic Hot Sale Section */}
+        <View style={[styles.sectionContainer, { backgroundColor: theme.card, borderColor: theme.border, borderWidth: isDarkMode ? 1 : 0 }]}>
           <View style={styles.sectionHeaderRow}>
-            <Text style={styles.sectionTitle}>Hot Sale (Top Selling)</Text>
+            <Text style={[styles.sectionTitle, { color: theme.text }]}>Hot Sale (Top Selling)</Text>
             <TouchableOpacity onPress={() => navigateToRoot('CategoryProducts')}>
               <Text style={styles.viewAllText}>View All ></Text>
             </TouchableOpacity>
@@ -291,15 +349,7 @@ export default function ProfileScreen() {
               <Text style={styles.loaderText}>Loading top sales...</Text>
             </View>
           ) : hotSales.length > 0 ? (
-            <FlatList
-              data={hotSales}
-              renderItem={renderProductItem}
-              keyExtractor={(item) => item.id.toString()}
-              numColumns={2}
-              columnWrapperStyle={styles.columnWrapper}
-              scrollEnabled={false}
-              showsVerticalScrollIndicator={false}
-            />
+            <View>{renderProductGrid()}</View>
           ) : (
             <Text style={styles.noDataText}>No products available right now.</Text>
           )}
@@ -313,7 +363,6 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F3F4F6',
   },
   headerContainer: {
     paddingHorizontal: 16,
@@ -326,6 +375,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'flex-end',
     marginBottom: 5,
+    alignItems: 'center',
   },
   settingsBtn: {
     padding: 4,
@@ -345,12 +395,10 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: 32,
-    backgroundColor: '#FFFFFF',
     justifyContent: 'center',
     alignItems: 'center',
     overflow: 'hidden',
     borderWidth: 2,
-    borderColor: '#FFFFFF',
   },
   avatarImage: {
     width: '100%',
@@ -418,7 +466,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.4)',
   },
   sectionContainer: {
-    backgroundColor: '#FFFFFF',
     marginTop: 10,
     marginHorizontal: 12,
     borderRadius: 12,
@@ -439,7 +486,6 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 14,
     fontWeight: '700',
-    color: '#1F2937',
   },
   viewAllText: {
     fontSize: 12,
@@ -466,7 +512,6 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: '#FEF2F2',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 6,
@@ -493,24 +538,21 @@ const styles = StyleSheet.create({
   },
   statusText: {
     fontSize: 10,
-    color: '#4B5563',
     textAlign: 'center',
   },
   serviceText: {
     fontSize: 10,
-    color: '#4B5563',
     textAlign: 'center',
   },
   columnWrapper: {
+    flexDirection: 'row',
     justifyContent: 'space-between',
     marginBottom: 10,
   },
   productCard: {
     width: '48%',
-    backgroundColor: '#FFFFFF',
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
     padding: 8,
   },
   productImage: {
@@ -521,7 +563,6 @@ const styles = StyleSheet.create({
   },
   productTitle: {
     fontSize: 11,
-    color: '#1F2937',
     height: 30,
     marginBottom: 6,
   },
@@ -533,7 +574,6 @@ const styles = StyleSheet.create({
   productPrice: {
     fontSize: 12,
     fontWeight: '700',
-    color: '#1F2937',
   },
   cartButton: {
     backgroundColor: '#EF4444',

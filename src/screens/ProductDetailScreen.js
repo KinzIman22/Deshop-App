@@ -6,7 +6,6 @@ import {
   Image,
   TouchableOpacity,
   StyleSheet,
-  SafeAreaView,
   Dimensions,
   Share,
   Alert,
@@ -14,14 +13,67 @@ import {
   TextInput,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
 
 import { PRODUCT_DETAIL_DATA } from '../data/productDetailData';
 import { CartContext } from '../context/CartContext';
+import { ThemeContext } from '../context/ThemeContext';
 
 const { width } = Dimensions.get('window');
 
+// Color Palette Definitions
+const lightTheme = {
+  bg: '#F3F4F6',
+  surface: '#FFF',
+  textPrimary: '#1F2937',
+  textSecondary: '#6B7280',
+  textMuted: '#9CA3AF',
+  textDark: '#111827',
+  border: '#E5E7EB',
+  inputBorder: '#D1D5DB',
+  carouselBg: '#E5E7EB',
+  overlayBtnBg: 'rgba(255, 255, 255, 0.9)',
+  overlayBtnIcon: '#000',
+  paginationBg: 'rgba(0,0,0,0.6)',
+  paginationText: '#FFF',
+  saleBannerBg: '#FFF7ED',
+  saleBannerBorder: '#FFEDD5',
+  modalOverlay: 'rgba(0,0,0,0.5)',
+  counterBg: '#F3F4F6',
+  imagePickerBg: '#FFF7ED',
+  recCardBg: '#FFFFFF',
+};
+
+const darkTheme = {
+  bg: '#121212',
+  surface: '#1E1E1E',
+  textPrimary: '#F9FAFB',
+  textSecondary: '#9CA3AF',
+  textMuted: '#6B7280',
+  textDark: '#F3F4F6',
+  border: '#2D2D2D',
+  inputBorder: '#4B5563',
+  carouselBg: '#2A2A2A',
+  overlayBtnBg: 'rgba(31, 41, 55, 0.9)',
+  overlayBtnIcon: '#F9FAFB',
+  paginationBg: 'rgba(0,0,0,0.75)',
+  paginationText: '#F9FAFB',
+  saleBannerBg: '#3B2219',
+  saleBannerBorder: '#431407',
+  modalOverlay: 'rgba(0,0,0,0.7)',
+  counterBg: '#374151',
+  imagePickerBg: '#3B2219',
+  recCardBg: '#FFFFFF',
+};
+
 export default function ProductDetailScreen({ navigation, route }) {
+  const insets = useSafeAreaInsets();
+  
+  // Access global ThemeContext consistent with ProfileScreen & other app screens
+  const { isDarkMode } = useContext(ThemeContext);
+  const theme = isDarkMode ? darkTheme : lightTheme;
+
   const productItem = route?.params?.product || PRODUCT_DETAIL_DATA;
 
   const [activeImageIndex, setActiveImageIndex] = useState(0);
@@ -91,7 +143,7 @@ export default function ProductDetailScreen({ navigation, route }) {
   // Pick Image from Gallery for Review
   const pickReviewImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ['images'],
       allowsEditing: true,
       aspect: [4, 3],
       quality: 0.8,
@@ -137,11 +189,11 @@ export default function ProductDetailScreen({ navigation, route }) {
   })();
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={[styles.container, { paddingTop: insets.top, backgroundColor: theme.bg }]}>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 90 }}>
         
         {/* Image Carousel & Top Header Container */}
-        <View style={styles.carouselContainer}>
+        <View style={[styles.carouselContainer, { backgroundColor: theme.carouselBg }]}>
           <ScrollView
             horizontal
             pagingEnabled
@@ -156,57 +208,63 @@ export default function ProductDetailScreen({ navigation, route }) {
 
           {/* Top Header Icons */}
           <View style={styles.topHeaderOverlay}>
-            <TouchableOpacity onPress={() => navigation.goBack()} style={styles.circleBtn}>
-              <Ionicons name="chevron-back" size={22} color="#000" />
+            <TouchableOpacity 
+              onPress={() => navigation.goBack()} 
+              style={[styles.circleBtn, { backgroundColor: theme.overlayBtnBg }]}
+            >
+              <Ionicons name="chevron-back" size={22} color={theme.overlayBtnIcon} />
             </TouchableOpacity>
             <View style={styles.rightHeaderBtns}>
               <TouchableOpacity 
-                style={[styles.circleBtn, { marginRight: 8 }]}
+                style={[styles.circleBtn, { marginRight: 8, backgroundColor: theme.overlayBtnBg }]}
                 onPress={() => navigation.navigate('CategoryProducts')}
               >
-                <Ionicons name="search-outline" size={20} color="#000" />
+                <Ionicons name="search-outline" size={20} color={theme.overlayBtnIcon} />
               </TouchableOpacity>
-              <TouchableOpacity style={styles.circleBtn} onPress={handleShare}>
-                <Ionicons name="share-outline" size={20} color="#000" />
+              <TouchableOpacity 
+                style={[styles.circleBtn, { backgroundColor: theme.overlayBtnBg }]} 
+                onPress={handleShare}
+              >
+                <Ionicons name="share-outline" size={20} color={theme.overlayBtnIcon} />
               </TouchableOpacity>
             </View>
           </View>
 
-          <View style={styles.paginationBadge}>
-            <Text style={styles.paginationText}>
+          <View style={[styles.paginationBadge, { backgroundColor: theme.paginationBg }]}>
+            <Text style={[styles.paginationText, { color: theme.paginationText }]}>
               {activeImageIndex + 1}/{imagesList.length}
             </Text>
           </View>
         </View>
 
         {/* Perks & Tags Bar */}
-        <View style={styles.perksBar}>
+        <View style={[styles.perksBar, { backgroundColor: theme.surface, borderBottomColor: theme.border }]}>
           <View style={styles.savingsTag}>
             <Text style={styles.savingsText}>SAVINGS</Text>
           </View>
-          <Text style={styles.perkItem}>✔ Free shipping</Text>
-          <Text style={styles.perkItem}>✔ Rs.280 Credit for delay</Text>
+          <Text style={[styles.perkItem, { color: theme.textPrimary }]}>✔ Free shipping</Text>
+          <Text style={[styles.perkItem, { color: theme.textPrimary }]}>✔ Rs.280 Credit for delay</Text>
         </View>
 
         {/* Title & Stats */}
-        <View style={styles.sectionContainer}>
+        <View style={[styles.sectionContainer, { backgroundColor: theme.surface }]}>
           <View style={styles.expressBadgeRow}>
             <View style={styles.expressBadge}>
               <Text style={styles.expressBadgeText}>2+ BUSINESS DAYS TO PK</Text>
             </View>
           </View>
-          <Text style={styles.productTitle}>{productItem.title}</Text>
+          <Text style={[styles.productTitle, { color: theme.textPrimary }]}>{productItem.title}</Text>
           <View style={styles.ratingRow}>
-            <Text style={styles.ratingNum}>{computedAverageRating}</Text>
+            <Text style={[styles.ratingNum, { color: theme.textDark }]}>{computedAverageRating}</Text>
             <Ionicons name="star" size={12} color="#F59E0B" style={{ marginLeft: 2 }} />
-            <Text style={styles.soldNum}> • {productItem.sold || "1k+ sold"}</Text>
+            <Text style={[styles.soldNum, { color: theme.textSecondary }]}> • {productItem.sold || "1k+ sold"}</Text>
           </View>
 
           {/* Pricing Row */}
           <View style={styles.priceSection}>
-            <Text style={styles.originalPrice}>{productItem.originalPrice || "Rs.3,500"}</Text>
+            <Text style={[styles.originalPrice, { color: theme.textMuted }]}>{productItem.originalPrice || "Rs.3,500"}</Text>
             <Text style={styles.currentPrice}>{productItem.price || productItem.currentPrice || "Rs.1,999"}</Text>
-            <Text style={styles.promoNote}>{productItem.promoText || "Extra 10% off"}</Text>
+            <Text style={[styles.promoNote, { color: theme.textSecondary }]}>{productItem.promoText || "Extra 10% off"}</Text>
           </View>
 
           <View style={styles.discountRow}>
@@ -217,7 +275,7 @@ export default function ProductDetailScreen({ navigation, route }) {
         </View>
 
         {/* Big Sale Countdown Banner */}
-        <View style={styles.saleBanner}>
+        <View style={[styles.saleBanner, { backgroundColor: theme.saleBannerBg, borderColor: theme.saleBannerBorder }]}>
           <View style={styles.saleHeaderRow}>
             <Text style={styles.saleTitle}>Big sale</Text>
             <View style={styles.timerRow}>
@@ -228,34 +286,34 @@ export default function ProductDetailScreen({ navigation, route }) {
         </View>
 
         {/* Reviews Section */}
-        <View style={styles.sectionContainer}>
+        <View style={[styles.sectionContainer, { backgroundColor: theme.surface }]}>
           <TouchableOpacity 
             style={styles.reviewsHeaderRow}
             onPress={() => setIsReviewModalVisible(true)}
           >
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <Text style={styles.ratingNum}>{computedAverageRating}</Text>
+              <Text style={[styles.ratingNum, { color: theme.textDark }]}>{computedAverageRating}</Text>
               <View style={{ flexDirection: 'row', marginLeft: 6 }}>
                 {[1, 2, 3, 4, 5].map((_, i) => (
                   <Ionicons key={i} name="star" size={14} color="#F59E0B" />
                 ))}
               </View>
-              <Text style={styles.reviewCountText}> ({totalReviewsCount})</Text>
+              <Text style={[styles.reviewCountText, { color: theme.textSecondary }]}> ({totalReviewsCount})</Text>
             </View>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <Text style={{ fontSize: 12, color: '#EA580C', fontWeight: 'bold', marginRight: 4 }}>Write Review</Text>
               <Ionicons name="chevron-forward" size={18} color="#EA580C" />
             </View>
           </TouchableOpacity>
-          <Text style={styles.verifiedText}>All reviews are from verified purchases</Text>
+          <Text style={[styles.verifiedText, { color: theme.textSecondary }]}>All reviews are from verified purchases</Text>
 
           {/* Render Reviews List */}
           <View style={{ marginTop: 10 }}>
             {reviewsList.map((rev) => (
-              <View key={rev.id} style={styles.userReviewCard}>
+              <View key={rev.id} style={[styles.userReviewCard, { borderTopColor: theme.border }]}>
                 <View style={styles.reviewHeader}>
-                  <Text style={styles.reviewerName}>{rev.name}</Text>
-                  <Text style={styles.reviewDate}>{rev.date}</Text>
+                  <Text style={[styles.reviewerName, { color: theme.textPrimary }]}>{rev.name}</Text>
+                  <Text style={[styles.reviewDate, { color: theme.textMuted }]}>{rev.date}</Text>
                 </View>
                 <View style={{ flexDirection: 'row', marginVertical: 4 }}>
                   {[1, 2, 3, 4, 5].map((star) => (
@@ -267,7 +325,7 @@ export default function ProductDetailScreen({ navigation, route }) {
                     />
                   ))}
                 </View>
-                <Text style={styles.reviewComment}>{rev.comment}</Text>
+                <Text style={[styles.reviewComment, { color: theme.textSecondary }]}>{rev.comment}</Text>
                 {rev.image && (
                   <Image source={{ uri: rev.image }} style={styles.reviewAttachedImg} />
                 )}
@@ -277,21 +335,21 @@ export default function ProductDetailScreen({ navigation, route }) {
         </View>
 
         {/* Recommended Header */}
-        <View style={styles.recommendedHeader}>
-          <Text style={styles.recommendedTitle}>Recommended for you</Text>
+        <View style={[styles.recommendedHeader, { backgroundColor: theme.surface }]}>
+          <Text style={[styles.recommendedTitle, { color: theme.textPrimary }]}>Recommended for you</Text>
         </View>
 
         <View style={styles.recommendedGrid}>
           {PRODUCT_DETAIL_DATA.recommendedProducts.map((item) => (
             <TouchableOpacity 
               key={item.id} 
-              style={styles.recCard}
+              style={[styles.recCard, { backgroundColor: theme.recCardBg }]}
               onPress={() => {
                 navigation.push('ItemDetail', { product: item });
               }}
             >
-              <Image source={{ uri: item.image }} style={styles.recImg} />
-              <Text style={styles.recTitle} numberOfLines={2}>{item.title}</Text>
+              <Image source={{ uri: item.image }} style={[styles.recImg, { backgroundColor: theme.carouselBg }]} />
+              <Text style={[styles.recTitle, { color: '#1F2937' }]} numberOfLines={2}>{item.title}</Text>
               <Text style={styles.recPrice}>{item.price}</Text>
             </TouchableOpacity>
           ))}
@@ -305,21 +363,21 @@ export default function ProductDetailScreen({ navigation, route }) {
         transparent={true}
         onRequestClose={() => setIsVariantModalVisible(false)}
       >
-        <View style={styles.modalOverlay}>
-          <View style={styles.variantModalContent}>
+        <View style={[styles.modalOverlay, { backgroundColor: theme.modalOverlay }]}>
+          <View style={[styles.variantModalContent, { backgroundColor: theme.surface }]}>
             
             {/* Top Close Row with Product Thumbnail & Price */}
-            <View style={styles.variantTopRow}>
+            <View style={[styles.variantTopRow, { borderBottomColor: theme.border }]}>
               <Image 
                 source={{ uri: selectedColorObj?.image || imagesList[0] }} 
-                style={styles.variantThumbImg} 
+                style={[styles.variantThumbImg, { backgroundColor: theme.carouselBg }]} 
               />
               <View style={{ flex: 1, marginLeft: 12 }}>
-                <Text style={styles.variantPriceText}>{productItem.price || "Rs.575"}</Text>
-                <Text style={styles.variantEstText}>Est. Rs.267 after applying promos</Text>
+                <Text style={[styles.variantPriceText, { color: theme.textDark }]}>{productItem.price || "Rs.575"}</Text>
+                <Text style={[styles.variantEstText, { color: theme.textSecondary }]}>Est. Rs.267 after applying promos</Text>
               </View>
               <TouchableOpacity onPress={() => setIsVariantModalVisible(false)} style={styles.closeBtnIcon}>
-                <Ionicons name="close" size={20} color="#374151" />
+                <Ionicons name="close" size={20} color={theme.textPrimary} />
               </TouchableOpacity>
             </View>
 
@@ -327,7 +385,7 @@ export default function ProductDetailScreen({ navigation, route }) {
               {/* Color Selection Header */}
               {productItem.colors && (
                 <View style={{ marginTop: 10 }}>
-                  <Text style={styles.optionLabel}>
+                  <Text style={[styles.optionLabel, { color: theme.textPrimary }]}>
                     Color: <Text style={{ fontWeight: 'bold' }}>{selectedColorObj?.name || "KC Golden"}</Text>
                   </Text>
                   <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: 8 }}>
@@ -336,11 +394,15 @@ export default function ProductDetailScreen({ navigation, route }) {
                       return (
                         <TouchableOpacity
                           key={col.id}
-                          style={[styles.colorCardModal, isSelected && styles.selectedColorCardModal]}
+                          style={[
+                            styles.colorCardModal, 
+                            { borderColor: theme.inputBorder },
+                            isSelected && styles.selectedColorCardModal
+                          ]}
                           onPress={() => setSelectedColor(col.id)}
                         >
                           <Image source={{ uri: col.image }} style={styles.colorCardImgModal} />
-                          <Text style={styles.colorCardTextModal} numberOfLines={1}>{col.name}</Text>
+                          <Text style={[styles.colorCardTextModal, { color: theme.textSecondary }]} numberOfLines={1}>{col.name}</Text>
                         </TouchableOpacity>
                       );
                     })}
@@ -350,40 +412,40 @@ export default function ProductDetailScreen({ navigation, route }) {
 
               {/* Service & Delivery Info */}
               <View style={{ marginTop: 16 }}>
-                <View style={styles.serviceBoxModal}>
-                  <Ionicons name="checkmark-circle" size={14} color="#166534" style={{ marginRight: 4 }} />
-                  <Text style={styles.serviceTextModal}>Arrives in PK in as little as 2 business days</Text>
+                <View style={[styles.serviceBoxModal, { backgroundColor: isDarkMode ? '#064E3B' : '#F0FDF4' }]}>
+                  <Ionicons name="checkmark-circle" size={14} color={isDarkMode ? '#34D399' : '#166534'} style={{ marginRight: 4 }} />
+                  <Text style={[styles.serviceTextModal, { color: isDarkMode ? '#A7F3D0' : '#166534' }]}>Arrives in PK in as little as 2 business days</Text>
                 </View>
-                <View style={[styles.serviceBoxModal, { marginTop: 6 }]}>
-                  <Ionicons name="checkmark-circle" size={14} color="#166534" style={{ marginRight: 4 }} />
-                  <Text style={styles.serviceTextModal}>FREE SHIPPING</Text>
+                <View style={[styles.serviceBoxModal, { marginTop: 6, backgroundColor: isDarkMode ? '#064E3B' : '#F0FDF4' }]}>
+                  <Ionicons name="checkmark-circle" size={14} color={isDarkMode ? '#34D399' : '#166534'} style={{ marginRight: 4 }} />
+                  <Text style={[styles.serviceTextModal, { color: isDarkMode ? '#A7F3D0' : '#166534' }]}>FREE SHIPPING</Text>
                 </View>
               </View>
 
               {/* Quantity Counter Row */}
               <View style={styles.qtyRowModal}>
-                <Text style={styles.optionLabel}>Qty</Text>
-                <View style={styles.counterContainer}>
+                <Text style={[styles.optionLabel, { color: theme.textPrimary }]}>Qty</Text>
+                <View style={[styles.counterContainer, { borderColor: theme.inputBorder }]}>
                   <TouchableOpacity
                     onPress={() => setQuantity(Math.max(1, quantity - 1))}
-                    style={styles.counterBtn}
+                    style={[styles.counterBtn, { backgroundColor: theme.counterBg }]}
                   >
-                    <Ionicons name="remove" size={16} color="#374151" />
+                    <Ionicons name="remove" size={16} color={theme.textPrimary} />
                   </TouchableOpacity>
-                  <Text style={styles.qtyText}>{quantity}</Text>
+                  <Text style={[styles.qtyText, { color: theme.textPrimary }]}>{quantity}</Text>
                   <TouchableOpacity
                     onPress={() => setQuantity(quantity + 1)}
-                    style={styles.counterBtn}
+                    style={[styles.counterBtn, { backgroundColor: theme.counterBg }]}
                   >
-                    <Ionicons name="add" size={16} color="#374151" />
+                    <Ionicons name="add" size={16} color={theme.textPrimary} />
                   </TouchableOpacity>
                 </View>
               </View>
-              <Text style={styles.soldNoteModal}>Added 🔥 74K+ sold</Text>
+              <Text style={[styles.soldNoteModal, { color: theme.textMuted }]}>Added 🔥 74K+ sold</Text>
             </ScrollView>
 
             {/* Bottom Action Bar inside Modal */}
-            <View style={styles.modalBottomActionRow}>
+            <View style={[styles.modalBottomActionRow, { borderTopColor: theme.border }]}>
               <TouchableOpacity style={styles.orangeActionBtn} onPress={handleAddToCart}>
                 <View style={{ alignItems: 'center', marginHorizontal: 12 }}>
                   <Text style={styles.orangeBtnMainText}>Add {quantity} to Cart</Text>
@@ -403,16 +465,16 @@ export default function ProductDetailScreen({ navigation, route }) {
         transparent={true}
         onRequestClose={() => setIsReviewModalVisible(false)}
       >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Write a Review</Text>
+        <View style={[styles.modalOverlay, { backgroundColor: theme.modalOverlay }]}>
+          <View style={[styles.modalContent, { backgroundColor: theme.surface }]}>
+            <View style={[styles.modalHeader, { borderBottomColor: theme.border }]}>
+              <Text style={[styles.modalTitle, { color: theme.textPrimary }]}>Write a Review</Text>
               <TouchableOpacity onPress={() => setIsReviewModalVisible(false)}>
-                <Ionicons name="close" size={24} color="#374151" />
+                <Ionicons name="close" size={24} color={theme.textPrimary} />
               </TouchableOpacity>
             </View>
 
-            <Text style={styles.modalSubLabel}>Select Rating</Text>
+            <Text style={[styles.modalSubLabel, { color: theme.textPrimary }]}>Select Rating</Text>
             <View style={styles.starRow}>
               {[1, 2, 3, 4, 5].map((star) => (
                 <TouchableOpacity key={star} onPress={() => setUserRating(star)}>
@@ -426,19 +488,22 @@ export default function ProductDetailScreen({ navigation, route }) {
               ))}
             </View>
 
-            <Text style={styles.modalSubLabel}>Your Review</Text>
+            <Text style={[styles.modalSubLabel, { color: theme.textPrimary }]}>Your Review</Text>
             <TextInput
-              style={styles.textInputArea}
+              style={[
+                styles.textInputArea, 
+                { borderColor: theme.inputBorder, color: theme.textPrimary, backgroundColor: theme.bg }
+              ]}
               placeholder="What did you like or dislike?"
-              placeholderTextColor="#9CA3AF"
+              placeholderTextColor={theme.textMuted}
               multiline
               numberOfLines={4}
               value={reviewText}
               onChangeText={setReviewText}
             />
 
-            <Text style={styles.modalSubLabel}>Add Photo (Optional)</Text>
-            <TouchableOpacity style={styles.imagePickerBtn} onPress={pickReviewImage}>
+            <Text style={[styles.modalSubLabel, { color: theme.textPrimary }]}>Add Photo (Optional)</Text>
+            <TouchableOpacity style={[styles.imagePickerBtn, { backgroundColor: theme.imagePickerBg }]} onPress={pickReviewImage}>
               <Ionicons name="camera-outline" size={20} color="#EA580C" />
               <Text style={styles.imagePickerText}>
                 {reviewImage ? "Change Image" : "Upload from Gallery"}
@@ -462,12 +527,12 @@ export default function ProductDetailScreen({ navigation, route }) {
       </Modal>
 
       {/* Sticky Bottom Action Bar with Cart Navigation */}
-      <View style={styles.bottomBar}>
+      <View style={[styles.bottomBar, { backgroundColor: theme.surface, borderTopColor: theme.border, paddingBottom: Math.max(insets.bottom, 10) }]}>
         <TouchableOpacity 
           style={styles.cartIconWrapper} 
           onPress={() => navigation.navigate('Cart')}
         >
-          <Ionicons name="cart-outline" size={24} color="#000" />
+          <Ionicons name="cart-outline" size={24} color={theme.textPrimary} />
           {cartCount > 0 && (
             <View style={styles.cartBadge}>
               <Text style={styles.cartBadgeTxt}>{cartCount}</Text>
@@ -478,14 +543,13 @@ export default function ProductDetailScreen({ navigation, route }) {
           <Text style={styles.selectOptionBtnText}>Select Option / Add to Cart</Text>
         </TouchableOpacity>
       </View>
-    </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F3F4F6',
   },
   topHeaderOverlay: {
     position: 'absolute',
@@ -501,7 +565,6 @@ const styles = StyleSheet.create({
     width: 38,
     height: 38,
     borderRadius: 19,
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: '#000',
@@ -515,7 +578,6 @@ const styles = StyleSheet.create({
   carouselContainer: {
     width: width,
     height: 360,
-    backgroundColor: '#E5E7EB',
     position: 'relative',
   },
   carouselImage: {
@@ -526,24 +588,20 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 12,
     right: 12,
-    backgroundColor: 'rgba(0,0,0,0.6)',
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 12,
   },
   paginationText: {
-    color: '#FFF',
     fontSize: 12,
     fontWeight: 'bold',
   },
   perksBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFF',
     paddingHorizontal: 12,
     paddingVertical: 10,
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
   },
   savingsTag: {
     backgroundColor: '#991B1B',
@@ -559,11 +617,9 @@ const styles = StyleSheet.create({
   },
   perkItem: {
     fontSize: 11,
-    color: '#374151',
     marginRight: 10,
   },
   sectionContainer: {
-    backgroundColor: '#FFF',
     padding: 12,
     marginTop: 8,
   },
@@ -584,7 +640,6 @@ const styles = StyleSheet.create({
   },
   productTitle: {
     fontSize: 14,
-    color: '#1F2937',
     fontWeight: '500',
   },
   ratingRow: {
@@ -594,11 +649,9 @@ const styles = StyleSheet.create({
   },
   ratingNum: {
     fontWeight: 'bold',
-    color: '#111827',
     fontSize: 13,
   },
   soldNum: {
-    color: '#6B7280',
     fontSize: 12,
   },
   priceSection: {
@@ -608,7 +661,6 @@ const styles = StyleSheet.create({
   },
   originalPrice: {
     textDecorationLine: 'line-through',
-    color: '#9CA3AF',
     fontSize: 12,
     marginRight: 6,
   },
@@ -620,7 +672,6 @@ const styles = StyleSheet.create({
   },
   promoNote: {
     fontSize: 11,
-    color: '#4B5563',
   },
   discountRow: {
     marginTop: 6,
@@ -638,11 +689,9 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   saleBanner: {
-    backgroundColor: '#FFF7ED',
     padding: 12,
     marginTop: 8,
     borderWidth: 1,
-    borderColor: '#FFEDD5',
   },
   saleHeaderRow: {
     flexDirection: 'row',
@@ -667,7 +716,6 @@ const styles = StyleSheet.create({
   optionLabel: {
     fontSize: 13,
     fontWeight: 'bold',
-    color: '#1F2937',
   },
   reviewsHeaderRow: {
     flexDirection: 'row',
@@ -675,11 +723,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   reviewCountText: {
-    color: '#4B5563',
     fontSize: 13,
   },
   verifiedText: {
-    color: '#6B7280',
     fontSize: 11,
     marginTop: 4,
   },
@@ -687,7 +733,6 @@ const styles = StyleSheet.create({
     marginTop: 10,
     paddingTop: 10,
     borderTopWidth: 1,
-    borderTopColor: '#E5E7EB',
   },
   reviewHeader: {
     flexDirection: 'row',
@@ -696,15 +741,12 @@ const styles = StyleSheet.create({
   reviewerName: {
     fontSize: 12,
     fontWeight: 'bold',
-    color: '#374151',
   },
   reviewDate: {
     fontSize: 11,
-    color: '#9CA3AF',
   },
   reviewComment: {
     fontSize: 12,
-    color: '#4B5563',
     marginTop: 2,
   },
   reviewAttachedImg: {
@@ -715,13 +757,11 @@ const styles = StyleSheet.create({
   },
   recommendedHeader: {
     padding: 12,
-    backgroundColor: '#FFF',
     marginTop: 8,
   },
   recommendedTitle: {
     fontSize: 15,
     fontWeight: 'bold',
-    color: '#1F2937',
   },
   recommendedGrid: {
     flexDirection: 'row',
@@ -731,7 +771,6 @@ const styles = StyleSheet.create({
   },
   recCard: {
     width: '48%',
-    backgroundColor: '#FFF',
     padding: 8,
     borderRadius: 6,
     marginBottom: 8,
@@ -740,11 +779,9 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 140,
     borderRadius: 4,
-    backgroundColor: '#E5E7EB',
   },
   recTitle: {
     fontSize: 12,
-    color: '#1F2937',
     marginTop: 6,
     height: 32,
   },
@@ -759,13 +796,11 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: '#FFF',
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 16,
-    paddingVertical: 10,
+    paddingTop: 10,
     borderTopWidth: 1,
-    borderTopColor: '#E5E7EB',
   },
   cartIconWrapper: {
     position: 'relative',
@@ -803,10 +838,8 @@ const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
     justifyContent: 'flex-end',
-    backgroundColor: 'rgba(0,0,0,0.5)',
   },
   variantModalContent: {
-    backgroundColor: '#FFF',
     borderTopLeftRadius: 16,
     borderTopRightRadius: 16,
     padding: 16,
@@ -816,23 +849,19 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
     paddingBottom: 12,
   },
   variantThumbImg: {
     width: 60,
     height: 60,
     borderRadius: 6,
-    backgroundColor: '#E5E7EB',
   },
   variantPriceText: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#111827',
   },
   variantEstText: {
     fontSize: 11,
-    color: '#4B5563',
     marginTop: 2,
   },
   closeBtnIcon: {
@@ -843,7 +872,6 @@ const styles = StyleSheet.create({
     height: 75,
     borderRadius: 6,
     borderWidth: 1,
-    borderColor: '#D1D5DB',
     marginRight: 8,
     alignItems: 'center',
     padding: 4,
@@ -859,18 +887,15 @@ const styles = StyleSheet.create({
   },
   colorCardTextModal: {
     fontSize: 10,
-    color: '#374151',
     marginTop: 2,
   },
   serviceBoxModal: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F0FDF4',
     padding: 8,
     borderRadius: 6,
   },
   serviceTextModal: {
-    color: '#166534',
     fontSize: 12,
     fontWeight: '500',
   },
@@ -884,23 +909,19 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#D1D5DB',
     borderRadius: 6,
   },
   counterBtn: {
     paddingHorizontal: 12,
     paddingVertical: 6,
-    backgroundColor: '#F3F4F6',
   },
   qtyText: {
     paddingHorizontal: 16,
     fontSize: 14,
     fontWeight: 'bold',
-    color: '#1F2937',
   },
   soldNoteModal: {
     fontSize: 12,
-    color: '#9CA3AF',
     marginTop: 10,
     marginBottom: 10,
   },
@@ -908,7 +929,6 @@ const styles = StyleSheet.create({
     marginTop: 10,
     paddingTop: 10,
     borderTopWidth: 1,
-    borderTopColor: '#E5E7EB',
   },
   orangeActionBtn: {
     backgroundColor: '#EA580C',
@@ -928,7 +948,6 @@ const styles = StyleSheet.create({
     fontSize: 10,
   },
   modalContent: {
-    backgroundColor: '#FFF',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     padding: 20,
@@ -939,18 +958,15 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
     paddingBottom: 12,
   },
   modalTitle: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#1F2937',
   },
   modalSubLabel: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#374151',
     marginTop: 16,
     marginBottom: 8,
   },
@@ -959,13 +975,11 @@ const styles = StyleSheet.create({
   },
   textInputArea: {
     borderWidth: 1,
-    borderColor: '#D1D5DB',
     borderRadius: 8,
     padding: 10,
     textAlignVertical: 'top',
     height: 100,
     fontSize: 14,
-    color: '#1F2937',
   },
   imagePickerBtn: {
     flexDirection: 'row',
@@ -975,7 +989,6 @@ const styles = StyleSheet.create({
     borderColor: '#EA580C',
     borderRadius: 8,
     padding: 12,
-    backgroundColor: '#FFF7ED',
   },
   imagePickerText: {
     marginLeft: 6,
@@ -997,20 +1010,17 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: -6,
     right: -6,
-    backgroundColor: '#FFF',
-    borderRadius: 10,
   },
   doneBtn: {
     backgroundColor: '#EA580C',
-    paddingVertical: 14,
     borderRadius: 24,
+    paddingVertical: 14,
     alignItems: 'center',
-    marginTop: 24,
-    marginBottom: 10,
+    marginTop: 20,
   },
   doneBtnText: {
     color: '#FFF',
-    fontSize: 15,
     fontWeight: 'bold',
+    fontSize: 15,
   },
 });

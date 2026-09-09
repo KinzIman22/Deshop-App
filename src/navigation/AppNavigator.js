@@ -18,6 +18,8 @@ import CheckoutAddressScreen from '../screens/CheckoutAddressScreen';
 import WhyChooseScreen from '../screens/WhyChooseScreen';
 import ServicesScreen from '../screens/ServicesScreen';
 import SettingsScreen from '../screens/SettingsScreen';
+import LogoutScreen from '../screens/LogoutScreen'; 
+import EditProfileScreen from '../screens/EditProfileScreen'
 
 
 const Stack = createNativeStackNavigator();
@@ -46,6 +48,8 @@ export default function AppNavigator() {
         <Stack.Screen name="WhyChoose" component={WhyChooseScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Services" component={ServicesScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Settings" component={SettingsScreen} />
+        <Stack.Screen name="Logout" component={LogoutScreen} options={{ headerShown: false }} /> 
+        <Stack.Screen name="EditProfile" component={EditProfileScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

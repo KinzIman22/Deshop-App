@@ -102,64 +102,79 @@ export default function CheckoutAddressScreen({ navigation }) {
     setTimeout(() => { setStep3Green(true); }, 3000);
   };
 
+  // Fixed Global Theme Colors (Dark Theme Removed)
+  const theme = {
+    bg: '#121212',
+    card: '#1E1E1E',
+    text: '#F3F4F6',
+    textSecondary: '#9CA3AF',
+    border: '#2D2D2D',
+    inputBg: '#252525',
+    inputBorder: '#3F3F46',
+    promoBg: '#064E3B',
+    promoBorder: '#065F46',
+    promoText: '#6EE7B7',
+    modalOverlay: 'rgba(0, 0, 0, 0.7)',
+  };
+
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
+    <View style={[styles.container, { paddingTop: insets.top, backgroundColor: theme.bg }]}>
       <KeyboardAvoidingView 
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'} 
         style={{ flex: 1 }}
       >
         {/* Top Header */}
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-            <Ionicons name="chevron-back" size={22} color="#1F2937" />
+        <View style={[styles.header, { backgroundColor: theme.card, borderBottomColor: theme.border }]}>
+          <TouchableOpacity onPress={() => navigation.goBack()} style={[styles.backBtn, { backgroundColor: '#2D2D2D' }]}>
+            <Ionicons name="chevron-back" size={22} color={theme.text} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Add an address to order</Text>
+          <Text style={[styles.headerTitle, { color: theme.text }]}>Add an address to order</Text>
           <View style={{ width: 32 }} />
         </View>
 
         {/* Safeguard Secure Banner */}
-        <View style={styles.secureContainer}>
+        <View style={[styles.secureContainer, { backgroundColor: theme.card, borderBottomColor: theme.bg }]}>
           <Ionicons name="lock-closed" size={13} color="#16A34A" />
           <Text style={styles.secureText}> All data is safeguarded</Text>
         </View>
 
         {/* Free Shipping Highlight Banner */}
-        <View style={styles.promoBanner}>
+        <View style={[styles.promoBanner, { backgroundColor: theme.promoBg, borderBottomColor: theme.promoBorder }]}>
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             <Ionicons name="checkmark-circle" size={15} color="#16A34A" />
-            <Text style={styles.promoText}> Free shipping</Text>
+            <Text style={[styles.promoText, { color: theme.promoText }]}> Free shipping</Text>
           </View>
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             <Ionicons name="checkmark-circle" size={15} color="#16A34A" />
-            <Text style={styles.promoText}> 30-day price adjustment</Text>
+            <Text style={[styles.promoText, { color: theme.promoText }]}> 30-day price adjustment</Text>
           </View>
         </View>
 
         <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: insets.bottom + 30 }}>
           
           {/* Country Selector */}
-          <View style={styles.countrySelector}>
-            <Text style={styles.countryLabel}>Country / Region</Text>
+          <View style={[styles.countrySelector, { backgroundColor: theme.card, borderColor: theme.border }]}>
+            <Text style={[styles.countryLabel, { color: theme.textSecondary }]}>Country / Region</Text>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <Text style={{ fontWeight: '700', color: '#1F2937', marginRight: 4 }}>Pakistan</Text>
+              <Text style={{ fontWeight: '700', color: theme.text, marginRight: 4 }}>Pakistan</Text>
               <Ionicons name="shield-checkmark" size={16} color="#16A34A" />
             </View>
           </View>
 
           {/* Full Name */}
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Full name <Text style={{ color: '#EA580C' }}>*</Text></Text>
-            <View style={styles.inputContainer}>
+            <Text style={[styles.label, { color: theme.text }]}>Full name <Text style={{ color: '#EA580C' }}>*</Text></Text>
+            <View style={[styles.inputContainer, { backgroundColor: theme.inputBg, borderColor: theme.inputBorder }]}>
               <TextInput 
-                style={styles.input}
+                style={[styles.input, { color: theme.text }]}
                 placeholder="Enter full name"
                 value={fullName}
                 onChangeText={setFullName}
-                placeholderTextColor="#9CA3AF"
+                placeholderTextColor={theme.textSecondary}
               />
               {fullName.length > 0 && (
                 <TouchableOpacity onPress={() => setFullName('')}>
-                  <Ionicons name="close-circle" size={18} color="#9CA3AF" />
+                  <Ionicons name="close-circle" size={18} color={theme.textSecondary} />
                 </TouchableOpacity>
               )}
             </View>
@@ -167,79 +182,79 @@ export default function CheckoutAddressScreen({ navigation }) {
 
           {/* Phone Number */}
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Phone number <Text style={{ color: '#EA580C' }}>*</Text></Text>
-            <View style={[styles.inputContainer, { paddingHorizontal: 0 }]}>
+            <Text style={[styles.label, { color: theme.text }]}>Phone number <Text style={{ color: '#EA580C' }}>*</Text></Text>
+            <View style={[styles.inputContainer, { paddingHorizontal: 0, backgroundColor: theme.inputBg, borderColor: theme.inputBorder }]}>
               <View style={styles.phonePrefix}>
-                <Text style={{ fontWeight: '600', color: '#1F2937', fontSize: 13 }}>PK +92</Text>
-                <View style={styles.verticalDivider} />
+                <Text style={{ fontWeight: '600', color: theme.text, fontSize: 13 }}>PK +92</Text>
+                <View style={[styles.verticalDivider, { backgroundColor: theme.inputBorder }]} />
               </View>
               <TextInput 
-                style={[styles.input, { paddingLeft: 8 }]}
+                style={[styles.input, { paddingLeft: 8, color: theme.text }]}
                 value={phoneNumber}
                 onChangeText={setPhoneNumber}
                 keyboardType="phone-pad"
-                placeholderTextColor="#9CA3AF"
+                placeholderTextColor={theme.textSecondary}
               />
             </View>
           </View>
 
           {/* Province Field */}
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Province <Text style={{ color: '#EA580C' }}>*</Text></Text>
+            <Text style={[styles.label, { color: theme.text }]}>Province <Text style={{ color: '#EA580C' }}>*</Text></Text>
             <TouchableOpacity 
-              style={styles.dropdownContainer} 
+              style={[styles.dropdownContainer, { backgroundColor: theme.inputBg, borderColor: theme.inputBorder }]} 
               onPress={() => {
                 setModalType('province');
                 setSearchQuery('');
                 setModalVisible(true);
               }}
             >
-              <Text style={{ color: '#1F2937', fontWeight: '600' }}>{selectedProvince}</Text>
-              <Ionicons name="chevron-down" size={18} color="#4B5563" />
+              <Text style={{ color: theme.text, fontWeight: '600' }}>{selectedProvince}</Text>
+              <Ionicons name="chevron-down" size={18} color={theme.textSecondary} />
             </TouchableOpacity>
           </View>
 
           {/* City Field */}
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>City <Text style={{ color: '#EA580C' }}>*</Text></Text>
+            <Text style={[styles.label, { color: theme.text }]}>City <Text style={{ color: '#EA580C' }}>*</Text></Text>
             <TouchableOpacity 
-              style={styles.dropdownContainer} 
+              style={[styles.dropdownContainer, { backgroundColor: theme.inputBg, borderColor: theme.inputBorder }]} 
               onPress={() => {
                 setModalType('city');
                 setSearchQuery('');
                 setModalVisible(true);
               }}
             >
-              <Text style={{ color: '#1F2937', fontWeight: '600' }}>{selectedCity || 'Select City'}</Text>
-              <Ionicons name="search-outline" size={18} color="#4B5563" />
+              <Text style={{ color: theme.text, fontWeight: '600' }}>{selectedCity || 'Select City'}</Text>
+              <Ionicons name="search-outline" size={18} color={theme.textSecondary} />
             </TouchableOpacity>
           </View>
 
           {/* Building, street */}
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Building, street, and area etc. <Text style={{ color: '#EA580C' }}>*</Text></Text>
-            <View style={styles.inputContainer}>
+            <Text style={[styles.label, { color: theme.text }]}>Building, street, and area etc. <Text style={{ color: '#EA580C' }}>*</Text></Text>
+            <View style={[styles.inputContainer, { backgroundColor: theme.inputBg, borderColor: theme.inputBorder }]}>
               <TextInput 
-                style={styles.input}
+                style={[styles.input, { color: theme.text }]}
                 placeholder="House #15, Street #1, Wapda Town"
                 value={address}
                 onChangeText={setAddress}
-                placeholderTextColor="#9CA3AF"
+                placeholderTextColor={theme.textSecondary}
               />
             </View>
           </View>
 
           {/* Postal / ZIP Code (Optional) */}
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Postal Code / ZIP (Optional)</Text>
-            <View style={styles.inputContainer}>
+            <Text style={[styles.label, { color: theme.text }]}>Postal Code / ZIP (Optional)</Text>
+            <View style={[styles.inputContainer, { backgroundColor: theme.inputBg, borderColor: theme.inputBorder }]}>
               <TextInput 
-                style={styles.input}
+                style={[styles.input, { color: theme.text }]}
                 placeholder="e.g., 54000"
                 value={postalCode}
                 onChangeText={setPostalCode}
                 keyboardType="number-pad"
-                placeholderTextColor="#9CA3AF"
+                placeholderTextColor={theme.textSecondary}
               />
             </View>
           </View>
@@ -247,7 +262,7 @@ export default function CheckoutAddressScreen({ navigation }) {
         </ScrollView>
 
         {/* Bottom Save Button */}
-        <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 16) }]}>
+        <View style={[styles.footer, { backgroundColor: theme.card, borderTopColor: theme.border, paddingBottom: Math.max(insets.bottom, 16) }]}>
           <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
             <Text style={styles.saveButtonText}>Save & Proceed</Text>
           </TouchableOpacity>
@@ -257,30 +272,30 @@ export default function CheckoutAddressScreen({ navigation }) {
       {/* --- SELECTOR MODAL (Province / All Pakistan Cities Selection) --- */}
       <Modal visible={modalVisible} transparent animationType="slide">
         <View style={styles.selectorModalOverlay}>
-          <View style={styles.selectorModalContent}>
+          <View style={[styles.selectorModalContent, { backgroundColor: theme.card }]}>
             
             <View style={styles.selectorHeader}>
-              <Text style={styles.selectorTitle}>
+              <Text style={[styles.selectorTitle, { color: theme.text }]}>
                 {modalType === 'province' ? 'Select Province' : 'Select City in Pakistan'}
               </Text>
               <TouchableOpacity onPress={() => setModalVisible(false)}>
-                <Ionicons name="close" size={22} color="#1F2937" />
+                <Ionicons name="close" size={22} color={theme.text} />
               </TouchableOpacity>
             </View>
 
             {/* Search Box inside Modal */}
-            <View style={styles.searchBox}>
-              <Ionicons name="search" size={16} color="#9CA3AF" style={{ marginRight: 8 }} />
+            <View style={[styles.searchBox, { backgroundColor: '#252525' }]}>
+              <Ionicons name="search" size={16} color={theme.textSecondary} style={{ marginRight: 8 }} />
               <TextInput 
-                style={{ flex: 1, fontSize: 13, color: '#1F2937' }}
+                style={{ flex: 1, fontSize: 13, color: theme.text }}
                 placeholder={modalType === 'province' ? "Search province..." : "Search any city in Pakistan..."}
                 value={searchQuery}
                 onChangeText={setSearchQuery}
-                placeholderTextColor="#9CA3AF"
+                placeholderTextColor={theme.textSecondary}
               />
               {searchQuery.length > 0 && (
                 <TouchableOpacity onPress={() => setSearchQuery('')}>
-                  <Ionicons name="close-circle" size={16} color="#9CA3AF" />
+                  <Ionicons name="close-circle" size={16} color={theme.textSecondary} />
                 </TouchableOpacity>
               )}
             </View>
@@ -290,7 +305,7 @@ export default function CheckoutAddressScreen({ navigation }) {
               keyExtractor={(item, index) => index.toString()}
               renderItem={({ item }) => (
                 <TouchableOpacity 
-                  style={styles.listItem}
+                  style={[styles.listItem, { borderBottomColor: theme.border }]}
                   onPress={() => {
                     if (modalType === 'province') {
                       setSelectedProvince(item);
@@ -302,6 +317,7 @@ export default function CheckoutAddressScreen({ navigation }) {
                 >
                   <Text style={[
                     styles.listItemText, 
+                    { color: theme.textSecondary },
                     ((modalType === 'province' && selectedProvince === item) || 
                      (modalType === 'city' && selectedCity === item)) && { color: '#EA580C', fontWeight: '700' }
                   ]}>
@@ -316,7 +332,7 @@ export default function CheckoutAddressScreen({ navigation }) {
               showsVerticalScrollIndicator={false}
               contentContainerStyle={{ paddingVertical: 8 }}
               ListEmptyComponent={
-                <Text style={{ textAlign: 'center', color: '#9CA3AF', marginTop: 20, fontSize: 13 }}>
+                <Text style={{ textAlign: 'center', color: theme.textSecondary, marginTop: 20, fontSize: 13 }}>
                   No results found
                 </Text>
               }
@@ -329,18 +345,18 @@ export default function CheckoutAddressScreen({ navigation }) {
       {/* --- MODAL 1: Address Warning Modal --- */}
       <Modal visible={showWarningModal} transparent animationType="fade">
         <View style={styles.modalOverlay}>
-          <View style={styles.warningModalContent}>
+          <View style={[styles.warningModalContent, { backgroundColor: theme.card }]}>
             <View style={styles.warningIconBg}>
               <Ionicons name="alert" size={24} color="#D97706" />
             </View>
             
-            <Text style={styles.warningTitle}>
+            <Text style={[styles.warningTitle, { color: theme.text }]}>
               Courier may be unable to deliver if building or house number is missing. Please verify your address.
             </Text>
 
-            <Text style={styles.shippingAddressLabel}>Shipping address preview:</Text>
-            <View style={styles.addressPreviewBox}>
-              <Text style={styles.addressPreviewText}>
+            <Text style={[styles.shippingAddressLabel, { color: theme.textSecondary }]}>Shipping address preview:</Text>
+            <View style={[styles.addressPreviewBox, { backgroundColor: '#252525', borderColor: theme.border }]}>
+              <Text style={[styles.addressPreviewText, { color: theme.text }]}>
                 {address ? address : 'House #12'}, {selectedCity}, {selectedProvince} {postalCode ? `- ${postalCode}` : ''}
               </Text>
             </View>
@@ -353,10 +369,10 @@ export default function CheckoutAddressScreen({ navigation }) {
             </TouchableOpacity>
 
             <TouchableOpacity 
-              style={styles.isCorrectBtn} 
+              style={[styles.isCorrectBtn, { backgroundColor: theme.card, borderColor: theme.inputBorder }]} 
               onPress={handleItIsCorrect}
             >
-              <Text style={styles.isCorrectText}>It is correct</Text>
+              <Text style={[styles.isCorrectText, { color: theme.text }]}>It is correct</Text>
             </TouchableOpacity>
 
           </View>
@@ -366,42 +382,42 @@ export default function CheckoutAddressScreen({ navigation }) {
       {/* --- MODAL 2: Delivery Alerts & Step Animation Modal --- */}
       <Modal visible={showAlertsModal} transparent animationType="slide">
         <View style={styles.modalOverlay}>
-          <View style={styles.alertsModalContent}>
+          <View style={[styles.alertsModalContent, { backgroundColor: theme.card }]}>
             
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-              <Text style={styles.alertsTitle}>Delivery alerts</Text>
+              <Text style={[styles.alertsTitle, { color: theme.text }]}>Delivery alerts</Text>
               <TouchableOpacity onPress={() => setShowAlertsModal(false)}>
-                <Ionicons name="close" size={20} color="#1F2937" />
+                <Ionicons name="close" size={20} color={theme.text} />
               </TouchableOpacity>
             </View>
             
-            <Text style={styles.alertsSubTitle}>Turn on notifications to track real-time parcel movement.</Text>
+            <Text style={[styles.alertsSubTitle, { color: theme.textSecondary }]}>Turn on notifications to track real-time parcel movement.</Text>
 
             {/* Stepper Graphic Progress */}
             <View style={styles.stepperContainer}>
               <View style={styles.stepItem}>
-                <View style={[styles.stepCircle, step1Green && styles.greenCircle]}>
+                <View style={[styles.stepCircle, { backgroundColor: '#2D2D2D' }, step1Green && styles.greenCircle]}>
                   <Ionicons name="checkmark" size={16} color="#FFFFFF" />
                 </View>
-                <Text style={styles.stepText}>Processing</Text>
+                <Text style={[styles.stepText, { color: theme.textSecondary }]}>Processing</Text>
               </View>
 
-              <View style={[styles.stepLine, line1Green && styles.greenLine]} />
+              <View style={[styles.stepLine, { backgroundColor: '#2D2D2D' }, line1Green && styles.greenLine]} />
 
               <View style={styles.stepItem}>
-                <View style={[styles.stepCircle, step2Green && styles.greenCircle]}>
-                  <MaterialCommunityIcons name="truck-delivery" size={15} color={step2Green ? "#FFF" : "#9CA3AF"} />
+                <View style={[styles.stepCircle, { backgroundColor: '#2D2D2D' }, step2Green && styles.greenCircle]}>
+                  <MaterialCommunityIcons name="truck-delivery" size={15} color={step2Green ? "#FFF" : theme.textSecondary} />
                 </View>
-                <Text style={styles.stepText}>Shipped</Text>
+                <Text style={[styles.stepText, { color: theme.textSecondary }]}>Shipped</Text>
               </View>
 
-              <View style={[styles.stepLine, line2Green && styles.greenLine]} />
+              <View style={[styles.stepLine, { backgroundColor: '#2D2D2D' }, line2Green && styles.greenLine]} />
 
               <View style={styles.stepItem}>
-                <View style={[styles.stepCircle, step3Green && styles.greenCircle]}>
-                  <MaterialCommunityIcons name="package-variant-closed" size={15} color={step3Green ? "#FFF" : "#9CA3AF"} />
+                <View style={[styles.stepCircle, { backgroundColor: '#2D2D2D' }, step3Green && styles.greenCircle]}>
+                  <MaterialCommunityIcons name="package-variant-closed" size={15} color={step3Green ? "#FFF" : theme.textSecondary} />
                 </View>
-                <Text style={styles.stepText}>Delivered</Text>
+                <Text style={[styles.stepText, { color: theme.textSecondary }]}>Delivered</Text>
               </View>
             </View>
 
@@ -424,54 +440,45 @@ export default function CheckoutAddressScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F8FAFC' },
+  container: { flex: 1 },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: '#FFFFFF',
     borderBottomWidth: 1,
-    borderBottomColor: '#F1F5F9',
   },
   backBtn: {
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: '#F1F5F9',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  headerTitle: { fontSize: 15, fontWeight: '700', color: '#1F2937' },
+  headerTitle: { fontSize: 15, fontWeight: '700' },
   secureContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
     paddingVertical: 6,
     borderBottomWidth: 1,
-    borderBottomColor: '#F8FAFC',
   },
   secureText: { color: '#16A34A', fontWeight: '600', fontSize: 11 },
   promoBanner: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    backgroundColor: '#F0FDF4',
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderBottomWidth: 1,
-    borderBottomColor: '#DCFCE7',
   },
-  promoText: { fontSize: 11, color: '#166534', fontWeight: '600' },
+  promoText: { fontSize: 11, fontWeight: '600' },
   countrySelector: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    backgroundColor: '#FFFFFF',
     padding: 14,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
     marginBottom: 14,
     alignItems: 'center',
     shadowColor: '#000',
@@ -480,15 +487,13 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
     elevation: 1,
   },
-  countryLabel: { fontSize: 13, color: '#64748B', fontWeight: '500' },
+  countryLabel: { fontSize: 13, fontWeight: '500' },
   inputGroup: { marginBottom: 14 },
-  label: { fontSize: 12, fontWeight: '600', color: '#334155', marginBottom: 6 },
+  label: { fontSize: 12, fontWeight: '600', marginBottom: 6 },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: '#CBD5E1',
     borderRadius: 10,
     paddingHorizontal: 12,
     height: 48,
@@ -498,16 +503,14 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
     elevation: 1,
   },
-  input: { flex: 1, fontSize: 13, color: '#1E293B' },
+  input: { flex: 1, fontSize: 13 },
   phonePrefix: { flexDirection: 'row', alignItems: 'center', paddingLeft: 8, paddingRight: 4 },
-  verticalDivider: { width: 1, height: 20, backgroundColor: '#CBD5E1', marginLeft: 10 },
+  verticalDivider: { width: 1, height: 20, marginLeft: 10 },
   dropdownContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: '#CBD5E1',
     borderRadius: 10,
     paddingHorizontal: 12,
     height: 48,
@@ -517,7 +520,7 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
     elevation: 1,
   },
-  footer: { padding: 16, backgroundColor: '#FFFFFF', borderTopWidth: 1, borderTopColor: '#E2E8F0' },
+  footer: { padding: 16, borderTopWidth: 1 },
   saveButton: {
     backgroundColor: '#EA580C',
     height: 48,
@@ -533,9 +536,8 @@ const styles = StyleSheet.create({
   saveButtonText: { color: '#FFFFFF', fontSize: 15, fontWeight: '700' },
   
   // Selector Modal Styles
-  selectorModalOverlay: { flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.5)', justifyContent: 'flex-end' },
+  selectorModalOverlay: { flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.7)', justifyContent: 'flex-end' },
   selectorModalContent: {
-    backgroundColor: '#FFFFFF',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     padding: 16,
@@ -543,11 +545,10 @@ const styles = StyleSheet.create({
     paddingBottom: 30,
   },
   selectorHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
-  selectorTitle: { fontSize: 15, fontWeight: '700', color: '#1E293B' },
+  selectorTitle: { fontSize: 15, fontWeight: '700' },
   searchBox: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F1F5F9',
     borderRadius: 8,
     paddingHorizontal: 10,
     height: 40,
@@ -560,33 +561,32 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 8,
     borderBottomWidth: 1,
-    borderBottomColor: '#F8FAFC',
   },
-  listItemText: { fontSize: 13, color: '#334155' },
+  listItemText: { fontSize: 13 },
 
   // Warning Modal Styles
-  modalOverlay: { flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.5)', justifyContent: 'center', alignItems: 'center', padding: 20 },
-  warningModalContent: { backgroundColor: '#FFFFFF', borderRadius: 16, padding: 20, width: '100%', maxWidth: 330, alignItems: 'center' },
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.7)', justifyContent: 'center', alignItems: 'center', padding: 20 },
+  warningModalContent: { borderRadius: 16, padding: 20, width: '100%', maxWidth: 330, alignItems: 'center' },
   warningIconBg: { width: 44, height: 44, borderRadius: 22, backgroundColor: '#FEF3C7', justifyContent: 'center', alignItems: 'center', marginBottom: 12 },
-  warningTitle: { fontSize: 13, textAlign: 'center', color: '#334155', marginBottom: 14, lineHeight: 18, fontWeight: '500' },
-  shippingAddressLabel: { alignSelf: 'flex-start', fontSize: 12, color: '#64748B', marginBottom: 4 },
-  addressPreviewBox: { backgroundColor: '#F8FAFC', borderRadius: 8, padding: 10, width: '100%', marginBottom: 16, borderWidth: 1, borderColor: '#E2E8F0' },
-  addressPreviewText: { fontSize: 12, fontWeight: '600', color: '#1E293B' },
+  warningTitle: { fontSize: 13, textAlign: 'center', marginBottom: 14, lineHeight: 18, fontWeight: '500' },
+  shippingAddressLabel: { alignSelf: 'flex-start', fontSize: 12, marginBottom: 4 },
+  addressPreviewBox: { borderRadius: 8, padding: 10, width: '100%', marginBottom: 16, borderWidth: 1 },
+  addressPreviewText: { fontSize: 12, fontWeight: '600' },
   editMyAddressBtn: { backgroundColor: '#EA580C', width: '100%', height: 42, borderRadius: 21, justifyContent: 'center', alignItems: 'center', marginBottom: 8 },
   editMyAddressText: { color: '#FFFFFF', fontWeight: '700', fontSize: 13 },
-  isCorrectBtn: { backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#CBD5E1', width: '100%', height: 42, borderRadius: 21, justifyContent: 'center', alignItems: 'center' },
-  isCorrectText: { color: '#1E293B', fontWeight: '700', fontSize: 13 },
+  isCorrectBtn: { borderWidth: 1, width: '100%', height: 42, borderRadius: 21, justifyContent: 'center', alignItems: 'center' },
+  isCorrectText: { fontWeight: '700', fontSize: 13 },
 
   // Alerts Modal Styles
-  alertsModalContent: { backgroundColor: '#FFFFFF', borderRadius: 16, padding: 18, width: '100%', maxWidth: 330 },
-  alertsTitle: { fontSize: 16, fontWeight: '700', color: '#1E293B' },
-  alertsSubTitle: { fontSize: 12, color: '#64748B', marginBottom: 20 },
+  alertsModalContent: { borderRadius: 16, padding: 18, width: '100%', maxWidth: 330 },
+  alertsTitle: { fontSize: 16, fontWeight: '700' },
+  alertsSubTitle: { fontSize: 12, marginBottom: 20 },
   stepperContainer: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginBottom: 24 },
   stepItem: { alignItems: 'center' },
-  stepCircle: { width: 34, height: 34, borderRadius: 17, backgroundColor: '#E2E8F0', justifyContent: 'center', alignItems: 'center', marginBottom: 4 },
+  stepCircle: { width: 34, height: 34, borderRadius: 17, justifyContent: 'center', alignItems: 'center', marginBottom: 4 },
   greenCircle: { backgroundColor: '#16A34A' },
-  stepText: { fontSize: 11, fontWeight: '600', color: '#475569' },
-  stepLine: { flex: 1, height: 2, backgroundColor: '#E2E8F0', marginHorizontal: -10, marginTop: -14 },
+  stepText: { fontSize: 11, fontWeight: '600' },
+  stepLine: { flex: 1, height: 2, marginHorizontal: -10, marginTop: -14 },
   greenLine: { backgroundColor: '#16A34A' },
   okButton: { backgroundColor: '#EA580C', height: 44, borderRadius: 22, justifyContent: 'center', alignItems: 'center' },
   okButtonText: { color: '#FFFFFF', fontWeight: '700', fontSize: 14 },
