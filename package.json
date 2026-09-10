@@ -8,6 +8,7 @@
     "@react-navigation/native": "^6.1.18",
     "@react-navigation/native-stack": "^6.9.26",
     "expo": "^57.0.0",
+    "expo-av": "^16.0.8",
     "expo-font": "~57.0.3",
     "expo-image-picker": "~57.0.16",
     "expo-linear-gradient": "~57.0.1",

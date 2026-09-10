@@ -20,7 +20,8 @@ import ServicesScreen from '../screens/ServicesScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import LogoutScreen from '../screens/LogoutScreen'; 
 import EditProfileScreen from '../screens/EditProfileScreen'
-
+import NotificationsScreen from '../screens/NotificationsScreen';
+import PrivacyPolicyScreen from '../screens/PrivacyPolicyScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -50,6 +51,8 @@ export default function AppNavigator() {
         <Stack.Screen name="Settings" component={SettingsScreen} />
         <Stack.Screen name="Logout" component={LogoutScreen} options={{ headerShown: false }} /> 
         <Stack.Screen name="EditProfile" component={EditProfileScreen} />
+        <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicyScreen} />
+        <Stack.Screen name="Notifications" component={NotificationsScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
